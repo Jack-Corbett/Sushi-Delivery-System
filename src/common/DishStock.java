@@ -7,7 +7,7 @@ public class DishStock {
     private ArrayList<Dish> stock = new ArrayList<>();
     private IngredientStock ingredientStock;
 
-    DishStock(IngredientStock ingredientStock) {
+    public DishStock(IngredientStock ingredientStock) {
         this.ingredientStock = ingredientStock;
     }
 

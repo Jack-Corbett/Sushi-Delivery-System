@@ -1,13 +1,6 @@
 package common;
 
-public class Comms implements Runnable {
+public class Comms {
 
-    Comms() {
 
-    }
-
-    @Override
-    public void run() {
-
-    }
 }
