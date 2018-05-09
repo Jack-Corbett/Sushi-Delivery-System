@@ -68,6 +68,8 @@ public class Dish extends Model {
         this.restockThreshold = restockThreshold;
     }
 
+    // RECIPE
+
     public void setRecipe(Map<Ingredient, Number> recipe) {
         notifyUpdate("recipe", this.recipe, recipe);
         this.recipe = recipe;

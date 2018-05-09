@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Server implements ServerInterface {
 
@@ -15,7 +16,10 @@ public class Server implements ServerInterface {
     private ArrayList<Supplier> suppliers = new ArrayList<>();
     private ArrayList<Postcode> postcodes = new ArrayList<>();
     public ArrayList<User> users = new ArrayList<>();
-    public ArrayList<Order> orders = new ArrayList<>();
+
+    public ArrayList<Order> completedOrders = new ArrayList<>();
+    public ConcurrentLinkedQueue<Order> orderQueue = new ConcurrentLinkedQueue<>();
+
     private ArrayList<Staff> staff = new ArrayList<>();
     private ArrayList<Drone> drones = new ArrayList<>();
 
@@ -180,7 +184,7 @@ public class Server implements ServerInterface {
 
     @Override
     public Drone addDrone(Number speed) {
-        Drone drone = new Drone(is, speed.intValue());
+        Drone drone = new Drone(this, is, speed.intValue());
         drones.add(drone);
         return drone;
     }
@@ -228,12 +232,12 @@ public class Server implements ServerInterface {
 
     @Override
     public List<Order> getOrders() {
-        return orders;
+        return completedOrders;
     }
 
     @Override
     public void removeOrder(Order order) throws UnableToDeleteException {
-        orders.remove(order);
+        completedOrders.remove(order);
     }
 
     @Override

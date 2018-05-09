@@ -19,22 +19,22 @@ public class Staff extends Model implements Runnable {
     @Override
     public void run() {
         while (working) {
-            // Flag to trigger dish preparation
-            Boolean makeDish = true;
-
+            Boolean makeDish;
             // Monitor stock levels of dishes
             for (Dish dish : dishStock.getStock().keySet()) {
-                // If the amount of those dishes is below the restocking amount prepare another
-                if ( < dish.getRestockAmount()) {
+                // Flag to trigger dish preparation
+                makeDish = true;
+
+                // If the amount of those dishes is below the restocking threshold prepare another
+                if (dishStock.getStock().get(dish).intValue() < dish.getRestockThreshold().intValue()){
                     // Check there are enough ingredients
                     for (Ingredient ingredient : dish.getRecipe().keySet()) {
-                        if (ingredient.getAmount() < ingredient.getRestockAmount()) {
+                        if (ingredientStock.getStock().get(ingredient).intValue() < ingredient.getRestockThreshold()) {
                             makeDish = false;
                         }
                     }
                     // If there are enough ingredients prepare the dish
                     if (makeDish) prepareDish(dish);
-                    makeDish = true;
                 }
             }
         }
@@ -47,20 +47,14 @@ public class Staff extends Model implements Runnable {
             // Remove the ingredients used from the stock system
             ingredientStock.removeStock(dish.getRecipe());
 
-            try {
-                Thread.sleep((long) (Math.random() * 60000 + 20000));
-            } catch (InterruptedException e) {
-                System.err.println("Thread waiting failed");
-                e.printStackTrace();
-            }
+            Thread.sleep((long) (Math.random() * 60000 + 20000));
 
             // Add the newly prepared dish to the stock system
-            dishStock.addPreparedDish(dish);
+            dishStock.addStock(dish, 1);
 
             status = "Idle";
-
         } catch (Exception e) {
-            System.err.println("Staff member: " + this.getName() + " was unable to prepare " + dish.getName());
+            System.err.println("Staff member: " + getName() + " was unable to prepare " + dish.getName());
         }
     }
 
