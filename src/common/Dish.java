@@ -1,27 +1,21 @@
 package common;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 public class Dish extends Model {
 
     private String description;
     private Double price;
-    private ConcurrentHashMap<Ingredient, Integer> recipe;
+    private Integer restockThreshold;
     private Integer restockAmount;
-    public Integer amount;
+    private Map<Ingredient, Number> recipe;
 
-    Dish(String name, String description, Double price, ConcurrentHashMap<Ingredient, Integer> recipe, Integer startingAmount,
-         Integer restockAmount) {
+    public Dish(String name, String description, Double price, Integer restockThreshold, Integer restockAmount) {
         super.setName(name);
         this.description = description;
         this.price = price;
-        this.recipe = recipe;
-
-        if (startingAmount < 0) throw new IllegalArgumentException("Cannot set the initial amount level less than 0");
-        else this.amount = startingAmount;
-
-        if (restockAmount < 0) throw new IllegalArgumentException("Cannot set the restock value less than 0");
-        else this.restockAmount = restockAmount;
+        this.restockThreshold = restockThreshold;
+        this.restockAmount = restockAmount;
     }
 
     @Override
@@ -33,20 +27,20 @@ public class Dish extends Model {
         return description;
     }
 
-    public Double getPrice() {
+    public Number getPrice() {
         return price;
     }
 
-    public ConcurrentHashMap<Ingredient, Integer> getRecipe() {
-        return recipe;
+    public Number getRestockThreshold() {
+        return restockThreshold;
     }
 
-    public Integer getAmount() {
-        return amount;
-    }
-
-    public Integer getRestockAmount() {
+    public Number getRestockAmount() {
         return restockAmount;
+    }
+
+    public Map<Ingredient, Number> getRecipe() {
+        return recipe;
     }
 
     @Override
@@ -64,13 +58,26 @@ public class Dish extends Model {
         this.price = price;
     }
 
-    public void setRecipe(ConcurrentHashMap<Ingredient, Integer> recipe) {
+    public void setRestockAmount(Integer restockAmount) {
+        notifyUpdate("restockAmount", this.restockAmount, restockAmount);
+        this.restockAmount = restockAmount;
+    }
+
+    public void setRestockThreshold(Integer restockThreshold) {
+        notifyUpdate("restockThreshold", this.restockThreshold, restockThreshold);
+        this.restockThreshold = restockThreshold;
+    }
+
+    public void setRecipe(Map<Ingredient, Number> recipe) {
         notifyUpdate("recipe", this.recipe, recipe);
         this.recipe = recipe;
     }
 
-    public void setRestockAmount(Integer restockAmount) {
-        notifyUpdate("restockAmount", this.restockAmount, restockAmount);
-        this.restockAmount = restockAmount;
+    public void addIngredient(Ingredient ingredient, Number quantity) {
+        recipe.put(ingredient, quantity);
+    }
+
+    public void removeIngredient(Ingredient ingredient) {
+        recipe.remove(ingredient);
     }
 }

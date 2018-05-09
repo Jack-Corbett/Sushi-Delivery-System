@@ -1,38 +1,60 @@
 package common;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Order extends Model {
 
-    private ArrayList<String> items;
-    private Boolean status;
-    private Postcode postcode;
+    private User user;
+    private HashMap<Dish, Integer> items;
+    private Boolean complete;
+    private String status;
 
-    public Order(ArrayList<String> items, Postcode postcode) {
+    public Order(User user, HashMap<Dish, Integer> items) {
         this.items = items;
-        this.postcode = postcode;
-        setName("Order: " + items.toString() + " " + getPostcode());
-        this.status = false;
+        this.user = user;
+        setName("Order: " + items.toString() + " " + getUser());
+        this.complete = false;
+        this.status = "Processing";
     }
 
-    public boolean getStatus() {
-        return status;
+    public User getUser() {
+        return user;
     }
 
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
-
-    public Postcode getPostcode() {
-        return postcode;
-    }
-
-    public ArrayList<String> getItems() {
+    public HashMap<Dish, Integer> getItems() {
         return items;
+    }
+
+    public Boolean getComplete() {
+        return complete;
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     @Override
     public String getName() {
-        return null;
+        return name;
+    }
+
+    public Integer getDistance() {
+        return user.getPostcode().getDistance();
+    }
+
+    public Double getCost() {
+        Double total = 0.0;
+        for (Dish dish : items.keySet()) {
+            total += (dish.getPrice().doubleValue() * items.get(dish));
+        }
+        return total;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setComplete() {
+        this.complete = true;
     }
 }

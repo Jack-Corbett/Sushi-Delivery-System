@@ -5,7 +5,7 @@ public class Supplier extends Model {
     private Integer distance;
     //private Ingredient[] ingredients; - Maybe not needed
 
-    Supplier(String name, Integer distance) {
+    public Supplier(String name, Integer distance) {
         setName(name);
         this.distance = distance;
     }

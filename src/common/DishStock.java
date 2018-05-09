@@ -1,23 +1,44 @@
 package common;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DishStock {
 
-    private ArrayList<Dish> stock = new ArrayList<>();
-    private IngredientStock ingredientStock;
+    private ConcurrentHashMap<Dish, Number> stock;
+    private boolean restockingEnabled;
 
-    public DishStock(IngredientStock ingredientStock) {
-        this.ingredientStock = ingredientStock;
+    public DishStock() {
+        stock = new ConcurrentHashMap<>();
+        restockingEnabled = true;
     }
 
-    public ArrayList<Dish> getStock() {
+    public void setRestockingEnabled(boolean enabled) {
+        this.restockingEnabled = enabled;
+    }
+
+    public ConcurrentHashMap<Dish, Number> getStock() {
         return stock;
     }
 
-    public void addPreparedDish(Dish dish) {
-        synchronized (dish.amount) { dish.amount ++; }
+    public List<Dish> getDishes() {
+        return new ArrayList<>(stock.keySet());
     }
 
-    // Sending orders by drone and setting staff implemented later
+    public void addDishToStock(Dish dish, Number number) {
+        stock.put(dish, number);
+    }
+
+    public void setStockLevel(Dish dish, Number number) {
+        stock.replace(dish, number);
+    }
+
+    public void addStock(Dish dish, Number amount) {
+        stock.put(dish, stock.getOrDefault(dish, 0).intValue() + amount.intValue());
+    }
+
+    public void removeDish(Dish dish) {
+        stock.put(dish, stock.get(dish).intValue() - 1);
+    }
 }

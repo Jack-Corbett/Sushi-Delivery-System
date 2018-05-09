@@ -8,7 +8,7 @@ public class Staff extends Model implements Runnable {
     private IngredientStock ingredientStock;
     private DishStock dishStock;
 
-    Staff(String name, IngredientStock ingredientStock, DishStock dishStock) {
+    public Staff(String name, IngredientStock ingredientStock, DishStock dishStock) {
         setName(name);
         status = "Idle";
         working = true;
@@ -23,9 +23,9 @@ public class Staff extends Model implements Runnable {
             Boolean makeDish = true;
 
             // Monitor stock levels of dishes
-            for (Dish dish : dishStock.getStock()) {
+            for (Dish dish : dishStock.getStock().keySet()) {
                 // If the amount of those dishes is below the restocking amount prepare another
-                if (dish.getAmount() < dish.getRestockAmount()) {
+                if ( < dish.getRestockAmount()) {
                     // Check there are enough ingredients
                     for (Ingredient ingredient : dish.getRecipe().keySet()) {
                         if (ingredient.getAmount() < ingredient.getRestockAmount()) {

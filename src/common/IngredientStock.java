@@ -1,46 +1,58 @@
 package common;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class IngredientStock {
 
-    private ArrayList<Ingredient> stock;
+    private ConcurrentHashMap<Ingredient, Number> stock;
+    private boolean restockingEnabled;
 
     public IngredientStock() {
-        stock = new ArrayList<>();
+        stock = new ConcurrentHashMap<>();
+        restockingEnabled = true;
     }
 
-    public ArrayList<Ingredient> getStock() {
+    public void setRestockingEnabled(boolean enabled) {
+        this.restockingEnabled = enabled;
+    }
+
+    public ConcurrentHashMap<Ingredient, Number> getStock() {
         return stock;
     }
 
-    // Subtract stock when a recipe has been made
-    public void removeStock(ConcurrentHashMap<Ingredient, Integer> recipe) {
+    public List<Ingredient> getIngredients() {
+        return new ArrayList<>(stock.keySet());
+    }
 
-        // May need to swap ingredient implementation to string for comparison
-        for (Map.Entry<Ingredient, Integer> entry : recipe.entrySet()) {
+    public void addIngredientToStock(Ingredient ingredient, Number number) {
+        stock.put(ingredient, number);
+    }
+
+    public void setStockLevel(Ingredient ingredient, Number number) {
+        stock.replace(ingredient, number);
+    }
+
+    public void addStock(Ingredient ingredient, Number amount) {
+        stock.put(ingredient, stock.getOrDefault(ingredient, 0).intValue() + amount.intValue());
+    }
+
+    public void removeStock(Ingredient ingredient) {
+        stock.put(ingredient, stock.get(ingredient).intValue() - 1);
+    }
+
+    public void removeStock(Map<Ingredient, Number> recipe) {
+        for (Map.Entry<Ingredient, Number> entry : recipe.entrySet()) {
             Ingredient ingredient = entry.getKey();
-            Integer amountUsed = entry.getValue();
+            Number amountUsed = entry.getValue();
 
-            if (stock.contains(ingredient)) {
-                synchronized (ingredient.amount) {
-                    ingredient.amount -= amountUsed;
-                }
+            if (stock.containsKey(ingredient)) {
+                stock.put(ingredient, stock.get(ingredient).intValue() - amountUsed.intValue());
             } else {
                 System.err.println("Ingredient not found in stock system");
             }
         }
     }
-
-    // Used by drones
-    public void addStock() {
-
-    }
-
-    public void addIngredientToStock(Ingredient ingredient) {
-
-    }
-
 }
