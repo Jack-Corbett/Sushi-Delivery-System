@@ -9,47 +9,78 @@ import java.util.Map;
 
 public class Client implements ClientInterface {
 
-    private HashMap<String, User> users;
-    private ArrayList<Postcode> postcodes;
-
-    // This needs to be moved to a storage class in future
-    private IngredientStock ingredientStock;
-    private DishStock dishStock;
+    private CommsClient comms;
 
     public Client() {
-        postcodes = new ArrayList<>();
-        users = new HashMap<>();
-        populatePostcodes();
-
-        // MOVE to separate class so server can interact
-        ingredientStock = new IngredientStock();
-        dishStock = new DishStock(ingredientStock);
+        comms = new CommsClient();
     }
 
     @Override
     public User register(String username, String password, String address, Postcode postcode) {
-        User user = new User(username, password, address, postcode);
-        users.put(username, user);
-        return user;
+        comms.sendMessage("USER Register:" + username + ":" + password + ":" + address + ":" + postcode.getName());
+        User user;
+
+        if (comms.receiveMessage().equals("SUCCESS Register")) {
+            user = new User(username, password, address, postcode);
+            return user;
+        } else {
+            System.err.println("Registration failed");
+        }
+        return null;
     }
 
     @Override
     public User login(String username, String password) {
-        User user = users.get(username);
-        if (user.getPassword().equals(password)) {
+        comms.sendMessage("USER Login:" + username + ":" + password);
+        User user;
+        String[] response = comms.receiveMessage().split(":");
+
+        if (response[0].equals("SUCCESS Login")) {
+            user = new User(username, password, response[3], new Postcode(response[4], Integer.parseInt(response[5])));
             return user;
+        } else {
+            System.err.println("Login failed");
         }
         return null;
     }
 
     @Override
     public List<Postcode> getPostcodes() {
-        return postcodes;
+        comms.sendMessage("POSTCODE Fetch");
+        String[] response = comms.receiveMessage().split(":");
+        String[] details;
+        List<Postcode> postcodes = new ArrayList<>();
+
+        if (response[0].equals("POSTCODE All")) {
+            for (int i = 1; i < response.length; i++) {
+                details = response[i].split(",");
+                postcodes.add(new Postcode(details[0], Integer.parseInt(details[1])));
+            }
+            return postcodes;
+        } else {
+            System.err.println("Postcode fetch failed");
+        }
+        return null;
     }
 
     @Override
     public List<Dish> getDishes() {
-        return dishStock.getStock();
+        comms.sendMessage("DISH Fetch");
+        String[] response = comms.receiveMessage().split(":");
+        String[] details;
+        List<Dish> dishes = new ArrayList<>();
+
+        if (response[0].equals("DISH All")) {
+            for (int i = 1; i < response.length; i++) {
+                details = response[i].split(",");
+                dishes.add(new Dish(details[0], details[1], Double.parseDouble(details[2]),
+                        Integer.parseInt(details[3]), Integer.parseInt(details[4])));
+            }
+            return dishes;
+        } else {
+            System.err.println("Dish fetch failed");
+        }
+        return null;
     }
 
     @Override
@@ -72,60 +103,138 @@ public class Client implements ClientInterface {
         Double totalCost = 0.0;
         HashMap<Dish, Number> basket = user.getBasket();
         for (Dish dish : basket.keySet()) {
-            totalCost += (dish.getPrice() * basket.get(dish).intValue());
+            totalCost += (dish.getPrice().doubleValue() * basket.get(dish).intValue());
         }
         return totalCost;
     }
 
     @Override
     public void addDishToBasket(User user, Dish dish, Number quantity) {
-        user.getBasket().put(dish, quantity);
+        comms.sendMessage("USER Add to basket:" + user.getName() + ":" + dish.getName() + ":" + quantity);
+
+        if (comms.receiveMessage().equals("SUCCESS Added")) {
+            user.getBasket().put(dish, quantity);
+        } else {
+            System.err.println("Adding dish to basket failed");
+        }
     }
 
     @Override
     public void updateDishInBasket(User user, Dish dish, Number quantity) {
-        user.getBasket().put(dish, quantity);
+        comms.sendMessage("USER Update basket:" + user.getName() + ":" + dish.getName() + ":" + quantity);
+
+        if (comms.receiveMessage().equals("SUCCESS Updated")) {
+            user.getBasket().put(dish, quantity);
+        } else {
+            System.err.println("Updating dish in basket failed");
+        }
     }
 
     @Override
     public Order checkoutBasket(User user) {
+        comms.sendMessage("USER Checkout:" + user.getName());
+
+        if (comms.receiveMessage().equals("SUCCESS Order created")) {
+            Order order = new Order(user, user.getBasket());
+            user.orders.add(order);
+            user.clearBasket();
+            return order;
+        } else {
+            System.err.println("Checking out basket failed");
+        }
         return null;
     }
 
     @Override
     public void clearBasket(User user) {
-        user.getBasket().clear();
+        comms.sendMessage("USER Clear basket:" + user.getName());
+
+        if (comms.receiveMessage().equals("SUCCESS Basket cleared")) {
+            user.clearBasket();
+        } else {
+            System.err.println("Clearing basket failed");
+        }
     }
 
+    // USER Orders:Name.Desc.Price.RestockThreshold.RestockAmount * 5,Name.Desc.Price.RestockThreshold.RestockAmount * 5:Next order...
     @Override
     public List<Order> getOrders(User user) {
-        if (user == null) {
-            return new ArrayList<>();
+        comms.sendMessage("USER Get orders");
+        String[] response = comms.receiveMessage().split(":");
+        String[] stringOrders;
+        String[] orderElements;
+        String[] dishDetails;
+        ArrayList<Order> orders = new ArrayList<>();
+
+        if (response[0].equals("USER Orders")) {
+            for (int i = 1; i < response.length; i++) {
+                stringOrders = response[i].split(",");
+
+                // Create the hash map
+                HashMap<Dish, Number> orderItems = new HashMap<>();
+
+                for (String stringOrder : stringOrders) {
+                    orderElements = stringOrder.split(" * ");
+                    dishDetails = orderElements[0].split(".");
+                    orderItems.put(new Dish(dishDetails[0], dishDetails[1], Double.parseDouble(dishDetails[2]),
+                                    Integer.parseInt(dishDetails[3]), Integer.parseInt(dishDetails[4])),
+                            Integer.parseInt(orderElements[1]));
+                }
+                orders.add(new Order(user, orderItems));
+            }
+            user.setOrders(orders);
+            return user.getOrders();
+        } else {
+            System.err.println("Fetching orders failed");
         }
-        return user.getOrders();
-    }
-
-    @Override
-    public boolean isOrderComplete(Order order) {
-        return order.getStatus();
-    }
-
-    @Override
-    public String getOrderStatus(Order order) {
-        if (order.getStatus()) {
-            return "Order " + order.getName() + " is complete.";
-        }
-        return "Order " + order.getName() + " is not complete.";
-    }
-
-    @Override
-    public Number getOrderCost(Order order) {
         return null;
     }
 
     @Override
-    public void cancelOrder(Order order) {
+    public boolean isOrderComplete(Order order) {
+        comms.sendMessage("ORDER Is complete:" + order.getName());
+        String response = comms.receiveMessage();
+        switch (response) {
+            case "SUCCESS Complete":
+                order.setComplete();
+                return true;
+            case "SUCCESS Incomplete":
+                return false;
+            default:
+                System.err.println("Checking order completion failed. Default false returned");
+                break;
+        }
+        return false;
+    }
 
+    @Override
+    public String getOrderStatus(Order order) {
+        comms.sendMessage("ORDER Get status:" + order.getName());
+        String[] response = comms.receiveMessage().split(":");
+
+        if (response[0].equals("SUCCESS Status")) {
+            order.setStatus(response[1]);
+            return order.getStatus();
+        } else {
+            System.err.println("Getting order status failed.");
+        }
+        return null;
+    }
+
+    @Override
+    public Number getOrderCost(Order order) {
+        return order.getCost();
+    }
+
+    @Override
+    public void cancelOrder(Order order) {
+        comms.sendMessage("ORDER Cancel:" + order.getName());
+
+        if (comms.receiveMessage().equals("SUCCESS Cancelled")) {
+            order.setCancelled();
+        } else {
+            System.err.println("Cancelling order failed");
+        }
     }
 
     @Override
@@ -136,15 +245,5 @@ public class Client implements ClientInterface {
     @Override
     public void notifyUpdate() {
 
-    }
-
-    private void populatePostcodes() {
-        postcodes.add(new Postcode("SO16 0TA", 10));
-        postcodes.add(new Postcode("SO15 1NZ", 15));
-        postcodes.add(new Postcode("SO16 3NP", 20));
-        postcodes.add(new Postcode("SO14 5GZ", 8));
-        postcodes.add(new Postcode("SO16 7KC", 12));
-        postcodes.add(new Postcode("SO16 0BH", 20));
-        postcodes.add(new Postcode("SO16 2CD", 5));
     }
 }

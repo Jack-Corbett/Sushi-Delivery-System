@@ -11,16 +11,18 @@ public class CommsServer {
     private static ServerSocket serverSocket = null;
     // The client socket.
     private static Socket clientSocket = null;
+    private Server server;
 
     // This chat server can accept up to maxClientsCount clients' connections.
     private static final int maxClientsCount = 10;
     private static final CommsServerThread[] threads = new CommsServerThread[maxClientsCount];
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         CommsServer server = new CommsServer();
-    }
+    }*/
 
-    public CommsServer() {
+    CommsServer(Server server) {
+        this.server = server;
         int portNumber = 2222;
         try {
             serverSocket = new ServerSocket(portNumber);
@@ -36,7 +38,7 @@ public class CommsServer {
                 int i = 0;
                 for (i = 0; i < maxClientsCount; i++) {
                     if (threads[i] == null) {
-                        (threads[i] = new CommsServerThread(clientSocket, threads)).start();
+                        (threads[i] = new CommsServerThread(clientSocket, threads, server)).start();
                         break;
                     }
                 }

@@ -5,7 +5,6 @@ import java.util.HashMap;
 
 public class User extends Model {
 
-    private String username;
     private String password;
     private String address;
     private Postcode postcode;
@@ -13,20 +12,10 @@ public class User extends Model {
     public ArrayList<Order> orders = new ArrayList<>();
 
     public User(String username, String password, String address, Postcode postcode) {
-        this.username = username;
+        setName(username);
         this.password = password;
         this.address = address;
         this.postcode = postcode;
-        setName(username);
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-        setName("User:" + username);
     }
 
     public String getPassword() {
@@ -57,12 +46,20 @@ public class User extends Model {
         return basket;
     }
 
-    public void setBasket(HashMap<Dish, Number> basket) {
-        this.basket = basket;
+    public void addToBasket(Dish dish, Number quantity) {
+        basket.put(dish, quantity);
+    }
+
+    public void clearBasket() {
+        basket.clear();
     }
 
     public ArrayList<Order> getOrders() {
         return orders;
+    }
+
+    public void setOrders(ArrayList<Order> orders) {
+        this.orders = orders;
     }
 
     @Override

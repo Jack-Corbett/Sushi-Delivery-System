@@ -81,7 +81,7 @@ public class Configuration {
                             break;
                         case "ORDER":
 
-                            HashMap<Dish, Integer> order = new HashMap<>();
+                            HashMap<Dish, Number> order = new HashMap<>();
 
                             String[] orderElements = strings[2].split(",");
 
@@ -103,7 +103,7 @@ public class Configuration {
                                 if (user.getName().equals(strings[1])) orderUser = user;
                             }
 
-                            server.orders.add(new Order(orderUser, order));
+                            server.orderQueue.add(new Order(orderUser, order));
 
                             break;
                         case "STOCK":

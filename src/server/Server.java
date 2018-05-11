@@ -15,13 +15,16 @@ public class Server implements ServerInterface {
     private DishStock ds = new DishStock();
     private ArrayList<Supplier> suppliers = new ArrayList<>();
     private ArrayList<Postcode> postcodes = new ArrayList<>();
-    public ArrayList<User> users = new ArrayList<>();
-
-    public ArrayList<Order> completedOrders = new ArrayList<>();
-    public ConcurrentLinkedQueue<Order> orderQueue = new ConcurrentLinkedQueue<>();
-
     private ArrayList<Staff> staff = new ArrayList<>();
     private ArrayList<Drone> drones = new ArrayList<>();
+
+    public ArrayList<User> users = new ArrayList<>();
+    public ConcurrentLinkedQueue<Order> orderQueue = new ConcurrentLinkedQueue<>();
+    public ArrayList<Order> completedOrders = new ArrayList<>();
+
+    public Server() {
+        CommsServer comms = new CommsServer(this);
+    }
 
     @Override
     public void loadConfiguration(String filename) throws FileNotFoundException {
