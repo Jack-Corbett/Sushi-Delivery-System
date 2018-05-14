@@ -13,7 +13,7 @@ public class Order extends Model {
     public Order(User user, HashMap<Dish, Number> items) {
         this.items = items;
         this.user = user;
-        setName("Order: " + items.toString() + " " + getUser());
+        setName(getUser() + " " + items.toString());
         this.complete = false;
         this.cancelled = false;
         this.status = "Processing";
@@ -50,8 +50,10 @@ public class Order extends Model {
 
     public Double getCost() {
         Double total = 0.0;
-        for (Dish dish : items.keySet()) {
-            total += (dish.getPrice().doubleValue() * items.get(dish).intValue());
+        if (!items.isEmpty()) {
+            for (Dish dish : items.keySet()) {
+                total += (dish.getPrice().doubleValue() * items.get(dish).intValue());
+            }
         }
         return total;
     }
@@ -60,13 +62,19 @@ public class Order extends Model {
         this.status = status;
     }
 
+    // MAY NEED TO CHANGE THE ORDERING
     public void setComplete() {
+        notifyUpdate("status", status, "Complete");
         status = "Complete";
+        notifyUpdate("complete", complete, true);
         this.complete = true;
+
     }
 
     public void setCancelled() {
+        notifyUpdate("status", status, "Cancelled");
         status = "Cancelled";
+        notifyUpdate("cancelled", cancelled, true);
         this.cancelled = true;
     }
 }

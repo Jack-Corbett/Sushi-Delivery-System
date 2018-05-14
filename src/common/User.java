@@ -39,7 +39,9 @@ public class User extends Model {
     }
 
     public void setPostcode(Postcode postcode) {
+        Postcode oldPostcode = this.postcode;
         this.postcode = postcode;
+        notifyUpdate("postcode", oldPostcode, this.postcode);
     }
 
     public HashMap<Dish, Number> getBasket() {
@@ -48,10 +50,12 @@ public class User extends Model {
 
     public void addToBasket(Dish dish, Number quantity) {
         basket.put(dish, quantity);
+        notifyUpdate();
     }
 
     public void clearBasket() {
         basket.clear();
+        notifyUpdate();
     }
 
     public ArrayList<Order> getOrders() {
@@ -60,6 +64,7 @@ public class User extends Model {
 
     public void setOrders(ArrayList<Order> orders) {
         this.orders = orders;
+        notifyUpdate();
     }
 
     @Override

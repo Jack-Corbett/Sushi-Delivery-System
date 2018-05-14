@@ -284,7 +284,7 @@ public interface ServerInterface {
 	 * Get a list of all the orders in the system
 	 * @return list of orders
 	 */
-	public List<Order> getOrders();
+	public List getOrders();
 
 	/**
 	 * Remove an order from the system

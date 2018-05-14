@@ -3,16 +3,14 @@ package server;
 import common.*;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Server implements ServerInterface {
 
     // STORE OBJECT REFERENCES
-    public IngredientStock is = new IngredientStock();
-    private DishStock ds = new DishStock();
+    public IngredientStock is = new IngredientStock(this);
+    private DishStock ds = new DishStock(this);
     private ArrayList<Supplier> suppliers = new ArrayList<>();
     private ArrayList<Postcode> postcodes = new ArrayList<>();
     private ArrayList<Staff> staff = new ArrayList<>();
@@ -21,6 +19,12 @@ public class Server implements ServerInterface {
     public ArrayList<User> users = new ArrayList<>();
     public ConcurrentLinkedQueue<Order> orderQueue = new ConcurrentLinkedQueue<>();
     public ArrayList<Order> completedOrders = new ArrayList<>();
+
+    public ConcurrentLinkedQueue<Ingredient> restockIngredientQueue = new ConcurrentLinkedQueue<>();
+
+    public ConcurrentLinkedQueue<Dish> restockDishQueue = new ConcurrentLinkedQueue<>();
+
+    private UpdateListener updateListener;
 
     public Server() {
         new CommsServer(this);
@@ -187,7 +191,8 @@ public class Server implements ServerInterface {
 
     @Override
     public Drone addDrone(Number speed) {
-        Drone drone = new Drone(this, is, speed.intValue());
+        Drone drone = new Drone(this, is, ds, speed.intValue());
+        new Thread(drone).start();
         drones.add(drone);
         return drone;
     }
@@ -216,7 +221,8 @@ public class Server implements ServerInterface {
 
     @Override
     public Staff addStaff(String name) {
-        Staff staffMember = new Staff(name, is, ds);
+        Staff staffMember = new Staff(this, name, is, ds);
+        new Thread(staffMember).start();
         staff.add(staffMember);
         return staffMember;
     }
@@ -235,11 +241,15 @@ public class Server implements ServerInterface {
 
     @Override
     public List<Order> getOrders() {
-        return completedOrders;
+        List<Order> orders = new ArrayList<>();
+        orders.addAll(orderQueue);
+        orders.addAll(completedOrders);
+        return orders;
     }
 
     @Override
     public void removeOrder(Order order) throws UnableToDeleteException {
+        orderQueue.remove(order);
         completedOrders.remove(order);
     }
 
@@ -294,11 +304,11 @@ public class Server implements ServerInterface {
 
     @Override
     public void addUpdateListener(UpdateListener listener) {
-
+        this.updateListener = listener;
     }
 
     @Override
     public void notifyUpdate() {
-
+        updateListener.updated(new UpdateEvent());
     }
 }

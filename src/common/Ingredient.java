@@ -6,17 +6,15 @@ public class Ingredient extends Model {
     private Supplier supplier;
     private Integer restockAmount;
     private Integer restockThreshold;
+    boolean restocking;
 
     public Ingredient(String name, String unit, Supplier supplier, Integer restockThreshold, Integer restockAmount) {
         super.setName(name);
         this.unit = unit;
         this.supplier = supplier;
-
-        if (restockThreshold < 0) throw new IllegalArgumentException("Cannot set the restock threshold less than 0");
-        else this.restockThreshold = restockThreshold;
-
-        if (restockAmount < 0) throw new IllegalArgumentException("Cannot set the restock value less than 0");
-        else this.restockAmount = restockAmount;
+        this.restockThreshold = restockThreshold;
+        this.restockAmount = restockAmount;
+        restocking = false;
     }
 
     @Override

@@ -3,6 +3,10 @@ import server.ServerWindow;
 
 import java.io.FileNotFoundException;
 
+/**
+ *
+ * @author Jack Corbett
+ */
 public class ServerApplication {
 
     public static void main(String args[]) {

@@ -7,7 +7,6 @@ import common.User;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -139,7 +138,10 @@ class CommsServerThread extends Thread {
                         osb.append("USER Orders:");
                         if (user != null) {
                             for (Order order : user.getOrders()) {
+
+                                // NOT LOOPING
                                 for (Map.Entry<Dish, Number> entry : order.getItems().entrySet()) {
+                                    System.out.println("I RAN");
                                     Dish dish = entry.getKey();
                                     Number amount = entry.getValue();
                                     osb.append(dish.getName());

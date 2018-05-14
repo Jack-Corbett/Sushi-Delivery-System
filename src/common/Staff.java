@@ -1,5 +1,7 @@
 package common;
 
+import server.Server;
+
 public class Staff extends Model implements Runnable {
 
     private String status;
@@ -7,35 +9,47 @@ public class Staff extends Model implements Runnable {
     // References to stock controllers
     private IngredientStock ingredientStock;
     private DishStock dishStock;
+    private Server server;
 
-    public Staff(String name, IngredientStock ingredientStock, DishStock dishStock) {
+    public Staff(Server server, String name, IngredientStock ingredientStock, DishStock dishStock) {
         setName(name);
         status = "Idle";
         working = true;
         this.ingredientStock = ingredientStock;
         this.dishStock = dishStock;
+        this.server = server;
     }
 
     @Override
     public void run() {
         while (working) {
-            Boolean makeDish;
-            // Monitor stock levels of dishes
-            for (Dish dish : dishStock.getStock().keySet()) {
-                // Flag to trigger dish preparation
-                makeDish = true;
+            Boolean makeDish = true;
 
-                // If the amount of those dishes is below the restocking threshold prepare another
-                if (dishStock.getStock().get(dish).intValue() < dish.getRestockThreshold().intValue()){
-                    // Check there are enough ingredients
-                    for (Ingredient ingredient : dish.getRecipe().keySet()) {
-                        if (ingredientStock.getStock().get(ingredient).intValue() < ingredient.getRestockThreshold()) {
+            Dish dish = server.restockDishQueue.poll();
+
+            if (dish != null) {
+                // Check there are enough ingredients
+                for (Ingredient ingredient : dish.getRecipe().keySet()) {
+                    if (ingredient != null) {
+                        if (ingredientStock.getStock().get(ingredient).intValue() <
+                                dish.getRecipe().get(ingredient).intValue()) {
                             makeDish = false;
                         }
+                    } else {
+                        makeDish = false;
                     }
-                    // If there are enough ingredients prepare the dish
-                    if (makeDish) prepareDish(dish);
                 }
+                // If there are enough ingredients prepare the dish
+                if (makeDish) {
+                    prepareDish(dish);
+                } else {
+                    server.restockDishQueue.add(dish);
+                }
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                System.err.println("Failed to wait before checking dish stock");
             }
         }
     }
@@ -43,16 +57,19 @@ public class Staff extends Model implements Runnable {
     private void prepareDish(Dish dish) {
         try {
             status = "Preparing " + dish.getName();
+            notifyUpdate();
 
             // Remove the ingredients used from the stock system
-            ingredientStock.removeStock(dish.getRecipe());
+            ingredientStock.removeStock(dish.getRecipe(), dish.getRestockAmount());
 
             Thread.sleep((long) (Math.random() * 60000 + 20000));
 
             // Add the newly prepared dish to the stock system
-            dishStock.addStock(dish, 1);
+            dishStock.addStock(dish, dish.getRestockAmount());
 
+            dish.restocking = false;
             status = "Idle";
+            notifyUpdate();
         } catch (Exception e) {
             System.err.println("Staff member: " + getName() + " was unable to prepare " + dish.getName());
         }

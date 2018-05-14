@@ -11,6 +11,7 @@ public class Client implements ClientInterface {
 
     private CommsClient comms;
     private ArrayList<Postcode> postcodes;
+    private UpdateListener updateListener;
 
     public Client() {
         comms = new CommsClient();
@@ -119,7 +120,7 @@ public class Client implements ClientInterface {
 
     @Override
     public void addDishToBasket(User user, Dish dish, Number quantity) {
-        comms.sendMessage("USER Add to basket:" + user.getName() + ":" + dish.getName() + ":" + quantity);
+        comms.sendMessage("USER Add to basket:" + dish.getName() + ":" + quantity);
 
         if (comms.receiveMessage().equals("SUCCESS Added")) {
             user.getBasket().put(dish, quantity);
@@ -130,7 +131,7 @@ public class Client implements ClientInterface {
 
     @Override
     public void updateDishInBasket(User user, Dish dish, Number quantity) {
-        comms.sendMessage("USER Update basket:" + user.getName() + ":" + dish.getName() + ":" + quantity);
+        comms.sendMessage("USER Update basket:" + dish.getName() + ":" + quantity);
 
         if (comms.receiveMessage().equals("SUCCESS Updated")) {
             user.getBasket().put(dish, quantity);
@@ -184,7 +185,7 @@ public class Client implements ClientInterface {
                     HashMap<Dish, Number> orderItems = new HashMap<>();
 
                     for (String stringOrder : stringOrders) {
-                        orderElements = stringOrder.split(" * ");
+                        orderElements = stringOrder.split(" \\* ");
                         dishDetails = orderElements[0].split(".");
                         orderItems.put(new Dish(dishDetails[0], dishDetails[1], Double.parseDouble(dishDetails[2]),
                                         Integer.parseInt(dishDetails[3]), Integer.parseInt(dishDetails[4])),
@@ -250,11 +251,11 @@ public class Client implements ClientInterface {
 
     @Override
     public void addUpdateListener(UpdateListener listener) {
-
+        this.updateListener = listener;
     }
 
     @Override
     public void notifyUpdate() {
-
+        updateListener.updated(new UpdateEvent());
     }
 }

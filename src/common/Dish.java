@@ -10,6 +10,7 @@ public class Dish extends Model {
     private Integer restockThreshold;
     private Integer restockAmount;
     private Map<Ingredient, Number> recipe;
+    boolean restocking;
 
     public Dish(String name, String description, Double price, Integer restockThreshold, Integer restockAmount) {
         super.setName(name);
@@ -18,6 +19,7 @@ public class Dish extends Model {
         this.restockThreshold = restockThreshold;
         this.restockAmount = restockAmount;
         recipe = new HashMap<>();
+        restocking = false;
     }
 
     @Override
@@ -50,16 +52,6 @@ public class Dish extends Model {
         super.setName(name);
     }
 
-    public void setDescription(String description) {
-        notifyUpdate("description", this.description, description);
-        this.description = description;
-    }
-
-    public void setPrice(Double price) {
-        notifyUpdate("price", this.price, price);
-        this.price = price;
-    }
-
     public void setRestockAmount(Integer restockAmount) {
         notifyUpdate("restockAmount", this.restockAmount, restockAmount);
         this.restockAmount = restockAmount;
@@ -78,10 +70,14 @@ public class Dish extends Model {
     }
 
     public void addIngredient(Ingredient ingredient, Number quantity) {
+        Map<Ingredient, Number> oldRecipe = recipe;
         recipe.put(ingredient, quantity);
+        notifyUpdate("recipe", oldRecipe, recipe);
     }
 
     public void removeIngredient(Ingredient ingredient) {
+        Map<Ingredient, Number> oldRecipe = recipe;
         recipe.remove(ingredient);
+        notifyUpdate("recipe", oldRecipe, recipe);
     }
 }

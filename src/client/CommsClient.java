@@ -5,12 +5,12 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 class CommsClient {
     private Socket clientSocket = null;
     private BufferedReader is = null;
     private PrintWriter os = null;
-    //private BufferedReader inputLine = null;
     private BlockingQueue<String> messageQueue = new LinkedBlockingQueue<>();
     private BlockingQueue<String> responseQueue = new LinkedBlockingQueue<>();
 
@@ -20,7 +20,6 @@ class CommsClient {
                 clientSocket = new Socket("localhost", 2222);
                 os = new PrintWriter(clientSocket.getOutputStream(), true);
                 is = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                //inputLine = new BufferedReader(new InputStreamReader(System.in));
             } catch (UnknownHostException e) {
                 System.err.println("Cannot find server");
             } catch (IOException e) {
@@ -61,10 +60,12 @@ class CommsClient {
     }
 
     String receiveMessage() {
-        String response = null;
-        while (response == null) {
-            response = responseQueue.poll();
+        try {
+            return responseQueue.poll(1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            System.err.println("Unable to receive response from server");
         }
-        return response;
+        System.err.println("Timeout - No response from server");
+        return null;
     }
 }

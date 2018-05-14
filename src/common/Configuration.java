@@ -15,11 +15,10 @@ public class Configuration {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader br = new BufferedReader(inputStreamReader);
 
-
-                String st;
-                while ((st = br.readLine()) != null) {
-                    if (st.equals("")) continue;
-                    String[] strings = st.split(":");
+                String string;
+                while ((string = br.readLine()) != null) {
+                    if (string.equals("")) continue;
+                    String[] strings = string.split(":");
 
                     switch (strings[0]) {
                         case "SUPPLIER":
@@ -49,7 +48,7 @@ public class Configuration {
 
                             for (String recipeElement : recipeElements) {
                                 // Split into ingredient and quantity
-                                String[] element = recipeElement.split(" * ");
+                                String[] element = recipeElement.split(" \\* ");
 
                                 // Pointer to the ingredient
                                 Ingredient recipeIngredient = null;
@@ -86,7 +85,7 @@ public class Configuration {
                             String[] orderElements = strings[2].split(",");
 
                             for (String orderElement : orderElements) {
-                                String[] element = orderElement.split(" * ");
+                                String[] element = orderElement.split(" \\* ");
 
                                 Dish orderDish = null;
 
