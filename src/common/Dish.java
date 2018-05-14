@@ -1,5 +1,6 @@
 package common;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Dish extends Model {
@@ -16,6 +17,7 @@ public class Dish extends Model {
         this.price = price;
         this.restockThreshold = restockThreshold;
         this.restockAmount = restockAmount;
+        recipe = new HashMap<>();
     }
 
     @Override

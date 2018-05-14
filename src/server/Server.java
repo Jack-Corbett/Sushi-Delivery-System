@@ -23,7 +23,7 @@ public class Server implements ServerInterface {
     public ArrayList<Order> completedOrders = new ArrayList<>();
 
     public Server() {
-        CommsServer comms = new CommsServer(this);
+        new CommsServer(this);
     }
 
     @Override

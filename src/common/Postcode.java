@@ -8,7 +8,7 @@ public class Postcode extends Model {
     public Postcode(String postcode, Integer distance) {
         code = postcode;
         this.distance = distance;
-        setName("Postcode: " + code);
+        setName(code);
     }
 
     public String getCode() {

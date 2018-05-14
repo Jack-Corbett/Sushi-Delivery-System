@@ -40,7 +40,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 	private DualPanel<User> userPanel;
 	private DualPanel<Postcode> postcodePanel;
 	private ConfigurationPanel configurationPanel;
-	
+
 	/**
 	 * Create a new server window with all associated panels
 	 * @param server
@@ -49,7 +49,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		super("Sushi Server");
 		this.server = server;
 		server.addUpdateListener(this);
-				
+
 		//Set up panels
 		orderPanel = new DualPanel<Order>(Order.class,() -> server.getOrders());
 		dishPanel = new DualPanel<Dish>(Dish.class,() -> server.getDishes());
@@ -60,44 +60,44 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		userPanel = new DualPanel<User>(User.class,() -> server.getUsers());
 		postcodePanel = new DualPanel<Postcode>(Postcode.class,() -> server.getPostcodes());
 		configurationPanel = new ConfigurationPanel();
-		
+
 		//Set up tabs
-        JTabbedPane tabs = new JTabbedPane();
-        tabs.addTab("Orders",orderPanel);
-        tabs.addTab("Dishes",dishPanel);
-        tabs.addTab("Ingredients",ingredientPanel);
-        tabs.addTab("Suppliers",supplierPanel);
-        tabs.addTab("Staff",staffPanel);
-        tabs.addTab("Drones",dronePanel);
-        tabs.addTab("Users",userPanel);
-        tabs.addTab("Postcodes",postcodePanel);
-        tabs.addTab("Configuration", configurationPanel);
-        add(tabs);
-        
-        //Set up properties and actions
-        setupProperties();
-        setupActions();
-		
+		JTabbedPane tabs = new JTabbedPane();
+		tabs.addTab("Orders",orderPanel);
+		tabs.addTab("Dishes",dishPanel);
+		tabs.addTab("Ingredients",ingredientPanel);
+		tabs.addTab("Suppliers",supplierPanel);
+		tabs.addTab("Staff",staffPanel);
+		tabs.addTab("Drones",dronePanel);
+		tabs.addTab("Users",userPanel);
+		tabs.addTab("Postcodes",postcodePanel);
+		tabs.addTab("Configuration", configurationPanel);
+		add(tabs);
+
+		//Set up properties and actions
+		setupProperties();
+		setupActions();
+
 		//Display window
 		setSize(800,600);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
-		
+
 		//Start timed updates
 		startTimer();
 	}
-	
+
 	/**
 	 * Start the timer which updates the user interface based on the given interval to update all panels
 	 */
 	public void startTimer() {
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);     
-        int timeInterval = 5;
-        
-        scheduler.scheduleAtFixedRate(() -> refreshAll(), 0, timeInterval, TimeUnit.SECONDS);
+		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+		int timeInterval = 5;
+
+		scheduler.scheduleAtFixedRate(() -> refreshAll(), 0, timeInterval, TimeUnit.SECONDS);
 	}
-		
+
 	/**
 	 * Set up the explicit properties that will be displayed and edited in the user interface.
 	 * Any public getter() will also be added automatically.
@@ -122,19 +122,19 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		ingredientPanel.addProperty("RestockThreshold","Number");
 		ingredientPanel.addProperty("RestockAmount","Number");
 		ingredientPanel.addColumn("Stock",() -> server.getIngredientStockLevels());
-		
+
 		//Staff
 		staffPanel.addProperty("Name");
 		staffPanel.addColumn("Status", staff -> server.getStaffStatus((Staff) staff));
-		
+
 		//Suppliers
 		supplierPanel.addProperty("Name");
 		supplierPanel.addProperty("Distance","Number");
-		
+
 		//Drones
 		dronePanel.addProperty("Speed","Number");
 		dronePanel.addColumn("Status", drone -> server.getDroneStatus((Drone) drone));
-		
+
 		//Postcodes
 		postcodePanel.addProperty("Code");
 		postcodePanel.addProperty("Distance","Number");
@@ -163,16 +163,16 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			}
 		});
 		orderPanel.delete.addActionListener(e -> {
-				Order currentOrder = orderPanel.getActive();
-				try {
-					server.removeOrder(currentOrder);
-				} catch (UnableToDeleteException exception) {
-					JOptionPane.showMessageDialog(orderPanel, "Unable to remove order: " + exception.getMessage());
-				}
+			Order currentOrder = orderPanel.getActive();
+			try {
+				server.removeOrder(currentOrder);
+			} catch (UnableToDeleteException exception) {
+				JOptionPane.showMessageDialog(orderPanel, "Unable to remove order: " + exception.getMessage());
+			}
 		});
-		
+
 		//Dishes
-		dishPanel.results.linkEnabled(dishPanel.edit);	
+		dishPanel.results.linkEnabled(dishPanel.edit);
 		dishPanel.add.addActionListener(e -> {
 			String name = (String) dishPanel.get("Name");
 			String unit = (String) dishPanel.get("Description");
@@ -196,106 +196,106 @@ public class ServerWindow extends JFrame implements UpdateListener {
 				JOptionPane.showMessageDialog(orderPanel, "Unable to remove dish: " + exception.getMessage());
 			}
 		});
-		
+
 		//Ingredients Panel
-		ingredientPanel.results.linkEnabled(ingredientPanel.edit);	
+		ingredientPanel.results.linkEnabled(ingredientPanel.edit);
 		ingredientPanel.edit.addActionListener(e -> {
 			Ingredient currentIngredient = ingredientPanel.getActive();
 			editIngredient(currentIngredient);
 		});
 		ingredientPanel.add.addActionListener(e -> {
-				String name = (String) ingredientPanel.get("Name");
-				String unit = (String) ingredientPanel.get("Unit");
-				Supplier supplier = (Supplier) ingredientPanel.get("Supplier");
-				Number restockThreshold = (Number) ingredientPanel.get("RestockThreshold");
-				Number restockAmount = (Number) ingredientPanel.get("RestockAmount");
-				server.addIngredient(name, unit, supplier, restockThreshold, restockAmount);
-				ingredientPanel.refresh();
-				ingredientPanel.reset();
+			String name = (String) ingredientPanel.get("Name");
+			String unit = (String) ingredientPanel.get("Unit");
+			Supplier supplier = (Supplier) ingredientPanel.get("Supplier");
+			Number restockThreshold = (Number) ingredientPanel.get("RestockThreshold");
+			Number restockAmount = (Number) ingredientPanel.get("RestockAmount");
+			server.addIngredient(name, unit, supplier, restockThreshold, restockAmount);
+			ingredientPanel.refresh();
+			ingredientPanel.reset();
 		});
 		ingredientPanel.delete.addActionListener(e -> {
-				Ingredient currentIngredient = ingredientPanel.getActive();
-				try {
-					server.removeIngredient(currentIngredient);
-				} catch (UnableToDeleteException exception) {
-					JOptionPane.showMessageDialog(orderPanel, "Unable to remove ingredient: " + exception.getMessage());
-				}
+			Ingredient currentIngredient = ingredientPanel.getActive();
+			try {
+				server.removeIngredient(currentIngredient);
+			} catch (UnableToDeleteException exception) {
+				JOptionPane.showMessageDialog(orderPanel, "Unable to remove ingredient: " + exception.getMessage());
+			}
 		});
-		
+
 		//Suppliers Panel
 		supplierPanel.add.addActionListener(e -> {
-				String name = (String) ingredientPanel.get("Name");
-				Number distance = (Number) supplierPanel.get("Distance");
-				server.addSupplier(name,distance);
-				supplierPanel.reset();
+			String name = (String) supplierPanel.get("Name");
+			Number distance = (Number) supplierPanel.get("Distance");
+			server.addSupplier(name,distance);
+			supplierPanel.reset();
 		});
 		supplierPanel.delete.addActionListener(e -> {
-				Supplier currentSupplier = supplierPanel.getActive();
-				try {
-					server.removeSupplier(currentSupplier);
-				} catch (UnableToDeleteException exception) {
-					JOptionPane.showMessageDialog(orderPanel, "Unable to remove supplier: " + exception.getMessage());
-				}
+			Supplier currentSupplier = supplierPanel.getActive();
+			try {
+				server.removeSupplier(currentSupplier);
+			} catch (UnableToDeleteException exception) {
+				JOptionPane.showMessageDialog(orderPanel, "Unable to remove supplier: " + exception.getMessage());
+			}
 		});
-		
+
 		//Staff Panel
 		staffPanel.add.addActionListener(e -> {
-				String name = (String) staffPanel.get("Name");
-				server.addStaff(name);
-				staffPanel.reset();
+			String name = (String) staffPanel.get("Name");
+			server.addStaff(name);
+			staffPanel.reset();
 		});
 		staffPanel.delete.addActionListener(e -> {
-				Staff currentStaff = staffPanel.getActive();
-				try {
-					server.removeStaff(currentStaff);
-				} catch (UnableToDeleteException exception) {
-					JOptionPane.showMessageDialog(orderPanel, "Unable to remove staff: " + exception.getMessage());
-				}
+			Staff currentStaff = staffPanel.getActive();
+			try {
+				server.removeStaff(currentStaff);
+			} catch (UnableToDeleteException exception) {
+				JOptionPane.showMessageDialog(orderPanel, "Unable to remove staff: " + exception.getMessage());
+			}
 		});
-		
+
 		//Drones Panel
 		dronePanel.add.addActionListener(e -> {
-				Number speed = (Number) dronePanel.get("Speed");
-				server.addDrone(speed);
-				dronePanel.reset();
+			Number speed = (Number) dronePanel.get("Speed");
+			server.addDrone(speed);
+			dronePanel.reset();
 		});
 		dronePanel.delete.addActionListener(e -> {
-				Drone currentDrone = dronePanel.getActive();
-				try {
-					server.removeDrone(currentDrone);
-				} catch (UnableToDeleteException exception) {
-					JOptionPane.showMessageDialog(orderPanel, "Unable to remove drone: " + exception.getMessage());
-				}
+			Drone currentDrone = dronePanel.getActive();
+			try {
+				server.removeDrone(currentDrone);
+			} catch (UnableToDeleteException exception) {
+				JOptionPane.showMessageDialog(orderPanel, "Unable to remove drone: " + exception.getMessage());
+			}
 		});
-		
+
 		//Postcodes Panel
 		postcodePanel.add.addActionListener(e -> {
-				String code = (String) postcodePanel.get("Code");
-				Number distance = (Number) postcodePanel.get("Distance");
-				server.addPostcode(code,distance);
-				postcodePanel.reset();
+			String code = (String) postcodePanel.get("Code");
+			Number distance = (Number) postcodePanel.get("Distance");
+			server.addPostcode(code,distance);
+			postcodePanel.reset();
 		});
 		postcodePanel.delete.addActionListener(e-> {
-				Postcode currentPostcode = postcodePanel.getActive();
-				try {
-					server.removePostcode(currentPostcode);
-				} catch (UnableToDeleteException exception) {
-					JOptionPane.showMessageDialog(orderPanel, "Unable to remove postcode: " + exception.getMessage());
-				}
+			Postcode currentPostcode = postcodePanel.getActive();
+			try {
+				server.removePostcode(currentPostcode);
+			} catch (UnableToDeleteException exception) {
+				JOptionPane.showMessageDialog(orderPanel, "Unable to remove postcode: " + exception.getMessage());
+			}
 		});
-		
+
 		//Users panel
 		userPanel.add.setEnabled(false);
 		userPanel.delete.addActionListener(e -> {
-				User currentUser = userPanel.getActive();
-				try {
-					server.removeUser(currentUser);
-				} catch (UnableToDeleteException exception) {
-					JOptionPane.showMessageDialog(orderPanel, "Unable to remove user: " + exception.getMessage());
-				}
+			User currentUser = userPanel.getActive();
+			try {
+				server.removeUser(currentUser);
+			} catch (UnableToDeleteException exception) {
+				JOptionPane.showMessageDialog(orderPanel, "Unable to remove user: " + exception.getMessage());
+			}
 		});
 	}
-	
+
 	/**
 	 * Display the edit recipe window
 	 * @param dish dish to edit
@@ -304,7 +304,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		RecipeFrame recipeFrame = new RecipeFrame(server,dish);
 		recipeFrame.setVisible(true);
 	}
-	
+
 	/**
 	 * Display the edit ingredient window
 	 * @param ingredient ingredient to edit
@@ -313,14 +313,14 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		IngredientFrame ingredientFrame = new IngredientFrame(server,ingredient);
 		ingredientFrame.setVisible(true);
 	}
-	
+
 	/**
 	 * A dual panel display which shows data at the top and allows adding new models at the bottom
 	 *
 	 * @param <T> model
 	 */
 	public class DualPanel<T> extends JPanel {
-		
+
 		private static final long serialVersionUID = 794325868675992863L;
 		private EditorPanel<T> editor;
 		private ResultsPanel<T> results;
@@ -330,8 +330,8 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		private Class<?> baseClass;
 		private java.util.function.Supplier dataSource;
 		private JButton edit;
-		
-		
+
+
 		/**
 		 * Create a new dual panel, based on the given glass and providing data based on the given data source
 		 * @param baseClass model class based on
@@ -340,17 +340,17 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		public DualPanel(Class<?> baseClass, java.util.function.Supplier dataSource) {
 			this.baseClass = baseClass;
 			this.dataSource = dataSource;
-			
+
 			setLayout(new BorderLayout());
-			
+
 			//Add dual editor and results pane at the top
 			JPanel inner = new JPanel(new GridLayout(2,1));
 			add(inner,BorderLayout.CENTER);
 			editor = new EditorPanel<T>();
 			results = new ResultsPanel<T>(baseClass,dataSource);
 			inner.add(results);
-			inner.add(editor);	
-			
+			inner.add(editor);
+
 			//Add delete and add buttons at the bottom
 			JPanel bottom = new JPanel(new GridLayout(1,2));
 			add(bottom,BorderLayout.SOUTH);
@@ -361,8 +361,8 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			edit.setEnabled(false);
 			bottom.add(delete);
 			bottom.add(edit);
-			bottom.add(add);		
-			
+			bottom.add(add);
+
 			//Enable the delete button when an item is selected
 			results.linkEnabled(delete);
 		}
@@ -381,7 +381,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		public void refresh() {
 			results.refresh();
 		}
-	
+
 		/**
 		 * Reset the input editors in the adding part of the pane
 		 */
@@ -413,7 +413,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			}
 			return null;
 		}
-		
+
 		/**
 		 * Get the field mapped to a given property name
 		 * @param property
@@ -431,7 +431,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			JComponent field = editor.addProperty(property);
 			properties.put(property,field);
 		}
-		
+
 		/**
 		 * Add a new property, with the given type, to the editor
 		 * @param property
@@ -441,7 +441,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			JComponent field = editor.addProperty(property,type);
 			properties.put(property,field);
 		}
-		
+
 		/**
 		 * Add a new property, with a combobox type with the given data source to populate it
 		 * @param property
@@ -451,7 +451,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			JComponent field = editor.addProperty(property,dataSource);
 			properties.put(property,field);
 		}
-		
+
 		/**
 		 * Add a new column to the viewer, provided by the given data source which is called per model
 		 * @param name
@@ -460,7 +460,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		public void addColumn(String name, java.util.function.Supplier dataSource) {
 			results.addColumn(name, dataSource);
 		}
-		
+
 		/**
 		 * Add a new column to the viewer, provided by the given data source mapping of models to objects
 		 * @param name
@@ -470,15 +470,15 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			results.addColumn(name, dataSource);
 		}
 
- 	}
-	
+	}
+
 	/**
 	 * Editor panel which displays a set of captions and fields
 	 *
 	 * @param <T> model type
 	 */
 	public class EditorPanel<T> extends JPanel {
-		
+
 		private static final long serialVersionUID = 5627333332721249294L;
 		private ParallelGroup groupLabels;
 		private ParallelGroup groupFields;
@@ -490,13 +490,13 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			setLayout(layout);
 			layout.setAutoCreateContainerGaps(true);
 			layout.setAutoCreateGaps(true);
-	
+
 			groupLabels = layout.createParallelGroup();
 			groupFields = layout.createParallelGroup();
 			groupRows = layout.createSequentialGroup();
 			layout.setHorizontalGroup(layout.createSequentialGroup()
-				    .addGroup(groupLabels)
-				    .addGroup(groupFields));
+					.addGroup(groupLabels)
+					.addGroup(groupFields));
 			layout.setVerticalGroup(groupRows);
 		}
 
@@ -508,7 +508,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		public JComponent addProperty(String name) {
 			return addProperty(name,"text");
 		}
-		
+
 		/**
 		 * Add a new property by name and with the given type
 		 * @param name of property
@@ -525,29 +525,29 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			} else {
 				field = new JTextField();
 			}
-			
+
 			addField(label,field);
-		    return field;
-		}	
-		
+			return field;
+		}
+
 		/**
 		 * Add a new property with a combobox filled by the given data source
 		 * @param name name of property
-		 * @param dataSource 
+		 * @param dataSource
 		 * @return
 		 */
 		public JComponent addProperty(String name, java.util.function.Supplier dataSource) {
 			JLabel label = new JLabel(name);
-			
+
 			JComboBox<String> field = new JComboBox<String>();
 			field.setModel(new ComboModel(dataSource));
 			if(field.getModel().getSize() > 0) {
 				field.setSelectedIndex(0);
 			}
 			addField(label,field);
-		    return field;
+			return field;
 		}
-		
+
 		/**
 		 * Provides the model to link a combobox to a datasource given backend
 		 *
@@ -557,7 +557,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			private static final long serialVersionUID = 3885818221611239892L;
 			private Object selected;
 			private java.util.function.Supplier<List<? extends Model>> dataSource;
-			
+
 			public ComboModel(java.util.function.Supplier<List<? extends Model>> dataSource) {
 				this.dataSource = dataSource;
 			}
@@ -581,18 +581,18 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			public Object getSelectedItem() {
 				return this.selected;
 			}
-				
+
 		}
-		
+
 		public void addField(JLabel label, JComponent field) {
 			groupLabels.addComponent(label);
-		    groupFields.addComponent(field);
-		    groupRows.addGroup(layout.createParallelGroup()
-		        .addComponent(label)
-		        .addComponent(field, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
+			groupFields.addComponent(field);
+			groupRows.addGroup(layout.createParallelGroup()
+					.addComponent(label)
+					.addComponent(field, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
 		}
 	}
-	
+
 	/**
 	 * Display a panel of results using a JTable linked to a datasource and particular class
 	 * Public getters of that model will become automatic visible columns.
@@ -600,19 +600,19 @@ public class ServerWindow extends JFrame implements UpdateListener {
 	 * @param <T> model
 	 */
 	public class ResultsPanel<T> extends JPanel {
-				
+
 		private static final long serialVersionUID = 8851523650992070549L;
 		private String[] columns;
 		private JTable table = new JTable();
-		
+
 		//Handle Map functions
-		private HashMap<String, java.util.function.Supplier<Map<? extends Model,Object>>> extras = 
+		private HashMap<String, java.util.function.Supplier<Map<? extends Model,Object>>> extras =
 				new HashMap<String, java.util.function.Supplier<Map<? extends Model,Object>>>();
-		
+
 		//Handle individual functions
-		private HashMap<String, Function<Model, Object>> extras2 = 
+		private HashMap<String, Function<Model, Object>> extras2 =
 				new HashMap<String, Function<Model, Object>>();
-		
+
 		private ResultsTable<Model> modelTable;
 		private List<? extends Model> model;
 		private java.util.function.Supplier<List<? extends Model>> dataSource;
@@ -620,47 +620,47 @@ public class ServerWindow extends JFrame implements UpdateListener {
 
 		public ResultsPanel(Class<?> baseClass, java.util.function.Supplier<List<? extends Model>> dataSource) {
 			this.baseClass = baseClass;
-			this.dataSource = dataSource; 
-			
+			this.dataSource = dataSource;
+
 			//Set up initial columns
 			setColumns();
-			
+
 			//Set up initial data
 			this.modelTable = new ResultsTable(this.columns,dataSource);
 			table.setModel(this.modelTable);
-			
+
 			//Add component
 			setLayout(new BorderLayout());
 			table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			JScrollPane pane = new JScrollPane(table);
 			add(pane,BorderLayout.CENTER);
 		}
-		
+
 		public void setColumns() {
 			ArrayList<String> viewable = new ArrayList<String>();
-			
+
 			Method[] methods = baseClass.getDeclaredMethods();
-			
+
 			ArrayList<Class> displayable = new ArrayList<Class>();
 			displayable.add(String.class);
 			displayable.add(Number.class);
 			displayable.add(Model.class);
-			
+
 			for(Method method : methods) {
 				String name = method.getName();
-				
+
 				//Check if this is a displayable class
 				boolean toDisplay = false;
 				for(Class<?> displayClass : displayable) {
 					Class<?> returnClass = method.getReturnType();
 					Class<?> superClass = method.getReturnType().getSuperclass();
-					if (returnClass.isAssignableFrom(displayClass) | 
+					if (returnClass.isAssignableFrom(displayClass) |
 							(superClass != null && superClass.isAssignableFrom(displayClass))) {
 						toDisplay = true;
 						break;
 					}
 				}
-				
+
 				//Skip those we can't display
 				if(!toDisplay) {
 					continue;
@@ -674,18 +674,18 @@ public class ServerWindow extends JFrame implements UpdateListener {
 					viewable.add(name.replaceFirst("get", ""));
 				}
 			}
-			
+
 			//Organise columns by alphabetical order, apart from name
 			viewable.sort(null);
-			
+
 			//Add name to the start
 			viewable.add(0, "Name");
-			
+
 			//Set up initial columns
 			columns = viewable.toArray(new String[viewable.size()]);
-			
+
 		}
-		
+
 		/**
 		 * Add a new viewer column with the given name
 		 * @param name property name
@@ -694,25 +694,25 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		private boolean addColumn(String name) {
 			//Dont allow duplicate columns
 			if(Arrays.asList(columns).contains(name)) return false;
-			
+
 			columns = Arrays.copyOf(columns, columns.length + 1);
 			columns[columns.length-1] = name;
 			return true;
 		}
-		
+
 		/**
 		 * Add a new viewer column backed by the given data source which provides a list of all models to values
 		 * @param name property name
 		 * @param dataSource function to call which returns all models -> value pairs
 		 */
-		public void addColumn(String name, java.util.function.Supplier<Map<? extends Model,Object>> dataSource) {	
+		public void addColumn(String name, java.util.function.Supplier<Map<? extends Model,Object>> dataSource) {
 			if (addColumn(name)) {
 				extras.put(name,dataSource);
 				modelTable.setColumns(columns,extras,extras2);
 				refresh();
 			}
 		}
-		
+
 		/**
 		 * Add a new viewer column backed by the given data source which provides a function to call for each model
 		 * @param name property name
@@ -748,42 +748,42 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			if(index < 0) return null;
 			return (T) modelTable.getValue(index);
 		}
-		
+
 		/**
 		 * Refresh all items in the table based on the linked data sources
 		 */
 		public void refresh() {
 			//Store previous selection
 			int previous = table.getSelectedRow();
-			
+
 			//Update the model
-			this.modelTable.refresh();		
-			
+			this.modelTable.refresh();
+
 			//Reselect
 			if(previous >= 0 && previous < table.getRowCount()) {
 				table.setRowSelectionInterval(previous, previous);
 			}
 		}
-		
+
 	}
-	
+
 	/**
 	 * Provides the results model to drive a JTable based on the provided data sources
 	 *
 	 * @param <T>
 	 */
 	public class ResultsTable<T> extends AbstractTableModel {
-		
+
 		private static final long serialVersionUID = -7827706350284097800L;
 		private String[] columns;
 		private Object[][] data;
-		private HashMap<String, java.util.function.Supplier<Map<? extends Model, Object>>> extras = 
+		private HashMap<String, java.util.function.Supplier<Map<? extends Model, Object>>> extras =
 				new HashMap<String, java.util.function.Supplier<Map<? extends Model, Object>>>();
 		private HashMap<String, Function<Model, Object>> extras2 = new HashMap<String, Function<Model, Object>>();
 
 		private java.util.function.Supplier<List<? extends Model>> dataSource;
 		private List<? extends Model> list;
-		
+
 		/**
 		 * Create a new results table model with the given columns and extra properties
 		 * @param columns string list of column names, which links to getters or extra properties
@@ -792,7 +792,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		public ResultsTable(String[] columns, java.util.function.Supplier<List<? extends Model>> dataSource) {
 			this.columns = columns;
 			this.dataSource = dataSource;
-			
+
 			list = dataSource.get();
 			refresh();
 		}
@@ -803,15 +803,15 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		 * @param extras mapping of property names to suppliers which return all model->value mappings
 		 * @param extras2 mapping of property names to a function of model->value individually
 		 */
-		public void setColumns(String[] columns, 
-				HashMap<String, java.util.function.Supplier<Map<? extends Model, Object>>> extras, 
-				HashMap<String, Function<Model, Object>> extras2
-				) {
+		public void setColumns(String[] columns,
+							   HashMap<String, java.util.function.Supplier<Map<? extends Model, Object>>> extras,
+							   HashMap<String, Function<Model, Object>> extras2
+		) {
 			this.columns = columns;
 			this.extras = extras;
 			this.extras2 = extras2;
 			this.fireTableStructureChanged();
-			
+
 			refresh();
 		}
 
@@ -820,12 +820,12 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		 */
 		public void refresh() {
 			list = dataSource.get();
-			
+
 			Object[][] data = new Object[list.size()][columns.length];
 			int index = 0;
 			for(Model model : list) {
 				data[index] = new Object[columns.length];
-				
+
 				int col = 0;
 				for(String columnName : columns) {
 					//Check for Model->Value mapping in extras
@@ -833,11 +833,11 @@ public class ServerWindow extends JFrame implements UpdateListener {
 						java.util.function.Supplier<Map<? extends Model, Object>> extraSource = extras.get(columnName);
 						Map<? extends Model, Object> extraColumns = extraSource.get();
 						data[index][col] = extraColumns.get(model);
-					//Check for Model->Value function in extras2 to call on each model
+						//Check for Model->Value function in extras2 to call on each model
 					} else if(extras2.containsKey(columnName)) {
 						Function<Model, Object> extraSource = extras2.get(columnName);
 						data[index][col] = extraSource.apply(model);
-					//Otherwise, call get<ColumName> on the model
+						//Otherwise, call get<ColumName> on the model
 					} else {
 						try {
 							Method method = model.getClass().getDeclaredMethod("get" + columnName);
@@ -852,23 +852,23 @@ public class ServerWindow extends JFrame implements UpdateListener {
 							e.printStackTrace();
 						}
 					}
-					
+
 					//Move on to the next column
 					col++;
 				}
-				
+
 				//Move on to the next row
 				index++;
 			}
 			this.data = data;
 			this.fireTableDataChanged();
 		}
-		
+
 		@Override
-		 public String getColumnName(int columnIndex) {
+		public String getColumnName(int columnIndex) {
 			return columns[columnIndex];
 		}
-		
+
 		@Override
 		public int getRowCount() {
 			return data.length;
@@ -883,12 +883,12 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			return data[rowIndex][columnIndex];
 		}
-		
+
 		public Object getValue(int index) {
 			return list.get(index);
 		}
 	}
-	
+
 	/**
 	 * Recipe editor frame, which allows editing the recipe components and restocking amounts
 	 *
@@ -907,24 +907,24 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		 */
 		public RecipeFrame(ServerInterface server, Dish dish) {
 			super("Edit recipe: " + dish.getName());
-			
+
 			setSize(400,500);
 			setLocationRelativeTo(null);
-			
+
 			this.server = server;
 			this.dish = dish;
 			setLayout(new BorderLayout());
-			
+
 			Map<Ingredient,Number> recipe = server.getRecipe(dish);
 			IngredientList ingredientList = new IngredientList(recipe);
 			JScrollPane scroller = new JScrollPane(ingredientList);
 			add(scroller,BorderLayout.CENTER);
-			
+
 			JPanel buttons = new JPanel(new GridLayout(1,2));
 			JButton save = new JButton("Save");
 			JButton cancel = new JButton("Cancel");
 			buttons.add(cancel);
-			
+
 			//Save recipe and restocking levels
 			buttons.add(save);
 			save.addActionListener(e -> {
@@ -936,12 +936,12 @@ public class ServerWindow extends JFrame implements UpdateListener {
 				this.dispose();
 			});
 			add(buttons,BorderLayout.SOUTH);
-			
+
 			//Set the save button as the default button
 			JRootPane rootPane = SwingUtilities.getRootPane(this);
 			rootPane.setDefaultButton(save);
 		}
-		
+
 		/**
 		 * Get the resulting recipe from the user interface as a mapping
 		 * @return map of ingredient to quantity numbers forming the recipe
@@ -950,20 +950,20 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			HashMap<Ingredient,Number> recipe = new HashMap<Ingredient,Number>();
 			for(Entry<Ingredient, JSpinner> mapping : ingredientMap.entrySet()) {
 				Ingredient ingredient = mapping.getKey();
-				Integer value = (Integer) mapping.getValue().getValue();
-					if(value > 0) {
-						recipe.put(ingredient, value);
+				Number value = (Number) mapping.getValue().getValue();
+				if(value.intValue() > 0) {
+					recipe.put(ingredient, value);
 				}
 			}
 			return recipe;
 		}
-		
+
 		/**
 		 * Provide a list of all ingredients to support the recipe editor
 		 *
 		 */
 		public class IngredientList extends JPanel {
-			
+
 			private static final long serialVersionUID = -534578199178503594L;
 			private ParallelGroup groupLabels;
 			private ParallelGroup groupFields;
@@ -971,7 +971,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			private GroupLayout layout;
 			private JSpinner restockThreshold;
 			private JSpinner restockAmount;
-			
+
 			/**
 			 * Create a new ingredient list, taking the current recipe to edit
 			 * @param recipe
@@ -982,31 +982,31 @@ public class ServerWindow extends JFrame implements UpdateListener {
 				setLayout(layout);
 				layout.setAutoCreateContainerGaps(true);
 				layout.setAutoCreateGaps(true);
-		
+
 				groupLabels = layout.createParallelGroup();
 				groupFields = layout.createParallelGroup();
 				groupRows = layout.createSequentialGroup();
 				layout.setHorizontalGroup(layout.createSequentialGroup()
-					    .addGroup(groupLabels)
-					    .addGroup(groupFields));
+						.addGroup(groupLabels)
+						.addGroup(groupFields));
 				layout.setVerticalGroup(groupRows);
-				
+
 				List<Ingredient> ingredients = server.getIngredients();
 				for(Ingredient ingredient : ingredients) {
 					JLabel ingredientName = new JLabel(ingredient.getName());
 					SpinnerNumberModel minMax = new SpinnerNumberModel(0,0,100000,1);
 					JSpinner ingredientQuantity = new JSpinner();
 					ingredientQuantity.setModel(minMax);
-					
+
 					//Load value from recipe
 					if(recipe.containsKey(ingredient)) {
 						ingredientQuantity.setValue(recipe.get(ingredient));
 					}
-					
+
 					addField(ingredientName,ingredientQuantity);
 					ingredientMap.put(ingredient, ingredientQuantity);
 				}
-				
+
 				//Create UI for editing restocking information
 				JLabel restockThresholdLabel = new JLabel("Restock Threshold");
 				SpinnerNumberModel minMax = new SpinnerNumberModel(0,0,100000,1);
@@ -1015,13 +1015,13 @@ public class ServerWindow extends JFrame implements UpdateListener {
 				JLabel restockAmountLabel = new JLabel("Restock Amount");
 				restockAmount = new JSpinner();
 				restockThreshold.setModel(minMax);
-				
+
 				//Get previous values for restocking
 				Number restockThresholdValue = server.getRestockThreshold(dish);
 				Number restockAmountValue = server.getRestockAmount(dish);
 				restockThreshold.setValue(restockThresholdValue);
 				restockAmount.setValue(restockAmountValue);
-				
+
 				//Add restocking to UI
 				JLabel optionsLabel = new JLabel("");
 				JSeparator options = new JSeparator();
@@ -1029,26 +1029,26 @@ public class ServerWindow extends JFrame implements UpdateListener {
 				addField(restockThresholdLabel,restockThreshold);
 				addField(restockAmountLabel,restockAmount);
 			}
-			
+
 			public Number getRestockThreshold() {
 				return (Number) restockThreshold.getValue();
 			}
-			
+
 			public Number getRestockAmount() {
 				return (Number) restockAmount.getValue();
 			}
 
 			public void addField(JLabel label, JComponent field) {
 				groupLabels.addComponent(label);
-			    groupFields.addComponent(field);
-			    groupRows.addGroup(layout.createParallelGroup()
-			        .addComponent(label)
-			        .addComponent(field, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
+				groupFields.addComponent(field);
+				groupRows.addGroup(layout.createParallelGroup()
+						.addComponent(label)
+						.addComponent(field, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
 			}
-			
+
 		}
 	}
-	
+
 	/**
 	 * Window to edit ingredient restocking levels
 	 *
@@ -1066,23 +1066,23 @@ public class ServerWindow extends JFrame implements UpdateListener {
 		 */
 		public IngredientFrame(ServerInterface server, Ingredient ingredient) {
 			super("Edit ingredient: " + ingredient.getName());
-			
+
 			setSize(400,200);
 			setLocationRelativeTo(null);
-			
+
 			this.server = server;
 			this.ingredient = ingredient;
 			setLayout(new BorderLayout());
-			
+
 			IngredientEditor ingredientEditor = new IngredientEditor();
 			JScrollPane scroller = new JScrollPane(ingredientEditor);
 			add(scroller,BorderLayout.CENTER);
-			
+
 			JPanel buttons = new JPanel(new GridLayout(1,2));
 			JButton save = new JButton("Save");
 			JButton cancel = new JButton("Cancel");
 			buttons.add(cancel);
-			
+
 			//Save recipe and restocking levels
 			buttons.add(save);
 			save.addActionListener(e -> {
@@ -1093,18 +1093,18 @@ public class ServerWindow extends JFrame implements UpdateListener {
 				this.dispose();
 			});
 			add(buttons,BorderLayout.SOUTH);
-			
+
 			//Set the save button as the default button
 			JRootPane rootPane = SwingUtilities.getRootPane(this);
 			rootPane.setDefaultButton(save);
 		}
-		
+
 		/**
 		 * Ingredient editor panel which provides the fields for editing the restocking levels and amounts
 		 *
 		 */
 		public class IngredientEditor extends JPanel {
-			
+
 			private static final long serialVersionUID = -534578199178503594L;
 			private ParallelGroup groupLabels;
 			private ParallelGroup groupFields;
@@ -1112,7 +1112,7 @@ public class ServerWindow extends JFrame implements UpdateListener {
 			private GroupLayout layout;
 			private JSpinner restockThreshold;
 			private JSpinner restockAmount;
-			
+
 			/**
 			 * Create a new ingredient editor panel with the relevant fields
 			 */
@@ -1122,15 +1122,15 @@ public class ServerWindow extends JFrame implements UpdateListener {
 				setLayout(layout);
 				layout.setAutoCreateContainerGaps(true);
 				layout.setAutoCreateGaps(true);
-		
+
 				groupLabels = layout.createParallelGroup();
 				groupFields = layout.createParallelGroup();
 				groupRows = layout.createSequentialGroup();
 				layout.setHorizontalGroup(layout.createSequentialGroup()
-					    .addGroup(groupLabels)
-					    .addGroup(groupFields));
+						.addGroup(groupLabels)
+						.addGroup(groupFields));
 				layout.setVerticalGroup(groupRows);
-				
+
 				//Create UI for editing restocking information
 				JLabel restockThresholdLabel = new JLabel("Restock Threshold");
 				SpinnerNumberModel minMax = new SpinnerNumberModel(0,0,100000,1);
@@ -1139,37 +1139,37 @@ public class ServerWindow extends JFrame implements UpdateListener {
 				JLabel restockAmountLabel = new JLabel("Restock Amount");
 				restockAmount = new JSpinner();
 				restockThreshold.setModel(minMax);
-				
+
 				//Get previous values for restocking
 				Number restockThresholdValue = server.getRestockThreshold(ingredient);
 				Number restockAmountValue = server.getRestockAmount(ingredient);
 				restockThreshold.setValue(restockThresholdValue);
 				restockAmount.setValue(restockAmountValue);
-				
+
 				//Add restocking to UI
 				addField(restockThresholdLabel,restockThreshold);
 				addField(restockAmountLabel,restockAmount);
 			}
-			
+
 			public Number getRestockThreshold() {
 				return (Number) restockThreshold.getValue();
 			}
-			
+
 			public Number getRestockAmount() {
 				return (Number) restockAmount.getValue();
 			}
 
 			public void addField(JLabel label, JComponent field) {
 				groupLabels.addComponent(label);
-			    groupFields.addComponent(field);
-			    groupRows.addGroup(layout.createParallelGroup()
-			        .addComponent(label)
-			        .addComponent(field, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
+				groupFields.addComponent(field);
+				groupRows.addGroup(layout.createParallelGroup()
+						.addComponent(label)
+						.addComponent(field, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
 			}
-			
+
 		}
 	}
-	
+
 	public class ConfigurationPanel extends JPanel {
 		public ConfigurationPanel() {
 			JButton loadConfiguration = new JButton("Load Configuration");
@@ -1194,15 +1194,16 @@ public class ServerWindow extends JFrame implements UpdateListener {
 	 */
 	public void refreshAll() {
 		//Refresh all panels
-        ingredientPanel.refresh();
-        dishPanel.refresh();
-        orderPanel.refresh();
-        dronePanel.refresh();
-        staffPanel.refresh();
-        postcodePanel.refresh();
-        supplierPanel.refresh();
+		ingredientPanel.refresh();
+		dishPanel.refresh();
+		orderPanel.refresh();
+		dronePanel.refresh();
+		staffPanel.refresh();
+		postcodePanel.refresh();
+		supplierPanel.refresh();
+		userPanel.refresh();
 	}
-	
+
 	@Override
 	/**
 	 * Respond to the model being updated by refreshing all data displays
@@ -1210,5 +1211,5 @@ public class ServerWindow extends JFrame implements UpdateListener {
 	public void updated(UpdateEvent updateEvent) {
 		refreshAll();
 	}
-	
+
 }

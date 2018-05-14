@@ -17,7 +17,7 @@ public class UpdateEvent {
 	 */
 	public UpdateEvent() {
 	}
-	
+
 	/**
 	 * Create a new update event belonging to a particular model
 	 * @param model the model being updated
@@ -25,7 +25,7 @@ public class UpdateEvent {
 	public UpdateEvent(Model model) {
 		this.model = model;
 	}
-	
+
 	/**
 	 * Create a new update evening belonging to a particular property value update on a model
 	 * @param model the model being updated

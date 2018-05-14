@@ -6,20 +6,13 @@ import java.net.UnknownHostException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class CommsClient {
+class CommsClient {
     private Socket clientSocket = null;
     private BufferedReader is = null;
     private PrintWriter os = null;
     //private BufferedReader inputLine = null;
     private BlockingQueue<String> messageQueue = new LinkedBlockingQueue<>();
     private BlockingQueue<String> responseQueue = new LinkedBlockingQueue<>();
-
-    public static void main(String[] args) {
-        CommsClient commsClient = new CommsClient();
-        commsClient.sendMessage("Hello Server");
-        System.out.println(commsClient.receiveMessage());
-        System.out.println(commsClient.receiveMessage());
-    }
 
     CommsClient() {
         Thread ClientThread = new Thread(() -> {
@@ -40,10 +33,10 @@ public class CommsClient {
                     String line;
                     String message;
                     while ((line = is.readLine()) != null) {
-                        //System.out.println(line);
+                        System.out.println(line);
                         responseQueue.add(line);
-                        if ((message = messageQueue.poll()) != null) {
-                            //System.out.println(message);
+                        if ((message = messageQueue.take()) != null) {
+                            System.out.println(message);
                             os.println(message);
                         }
                     }
@@ -55,6 +48,8 @@ public class CommsClient {
                     System.err.println("Trying to connect to unknown host: " + e.getMessage());
                 } catch (IOException e) {
                     System.err.println("IOException:  " + e.getMessage());
+                } catch (InterruptedException e) {
+                    System.err.println("Interrupted Exception: " + e.getMessage());
                 }
             }
         });

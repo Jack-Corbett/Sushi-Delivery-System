@@ -7,6 +7,8 @@ import common.User;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 class CommsServerThread extends Thread {
@@ -16,6 +18,7 @@ class CommsServerThread extends Thread {
     private Socket clientSocket = null;
     private final CommsServerThread[] threads;
     private int maxClientsCount;
+    private List<Postcode> currentPostcodes;
     // Stores a reference to the user of this client thread
     private User user;
 
@@ -77,7 +80,8 @@ class CommsServerThread extends Thread {
                         }
 
                         if (password != null && password.equals(message[2])) {
-                            os.println("SUCCESS Login");
+                            os.println("SUCCESS Login:" + user.getAddress() + ":" + user.getPostcode().getName()
+                                    + ":" + user.getPostcode().getDistance());
                         } else {
                             this.user = null;
                             os.println("FAILED Login");
@@ -133,24 +137,26 @@ class CommsServerThread extends Thread {
 
                         StringBuilder osb = new StringBuilder();
                         osb.append("USER Orders:");
-                        for (Order order : user.getOrders()) {
-                            for (Map.Entry<Dish, Number> entry : order.getItems().entrySet()) {
-                                Dish dish = entry.getKey();
-                                Number amount = entry.getValue();
-                                osb.append(dish.getName());
-                                osb.append(".");
-                                osb.append(dish.getDescription());
-                                osb.append(".");
-                                osb.append(dish.getPrice());
-                                osb.append(".");
-                                osb.append(dish.getRestockThreshold());
-                                osb.append(".");
-                                osb.append(dish.getRestockAmount());
-                                osb.append(" * ");
-                                osb.append(amount);
-                                osb.append(",");
+                        if (user != null) {
+                            for (Order order : user.getOrders()) {
+                                for (Map.Entry<Dish, Number> entry : order.getItems().entrySet()) {
+                                    Dish dish = entry.getKey();
+                                    Number amount = entry.getValue();
+                                    osb.append(dish.getName());
+                                    osb.append(".");
+                                    osb.append(dish.getDescription());
+                                    osb.append(".");
+                                    osb.append(dish.getPrice());
+                                    osb.append(".");
+                                    osb.append(dish.getRestockThreshold());
+                                    osb.append(".");
+                                    osb.append(dish.getRestockAmount());
+                                    osb.append(" * ");
+                                    osb.append(amount);
+                                    osb.append(",");
+                                }
+                                osb.append(":");
                             }
-                            osb.append(":");
                         }
                         os.println(osb.toString());
 
@@ -159,22 +165,28 @@ class CommsServerThread extends Thread {
                     // FETCH ALL POSTCODES
                     if (message[0].contains("Fetch")) {
 
-                        StringBuilder psb = new StringBuilder();
-                        psb.append("POSTCODE ALL:");
-                        for (Postcode postcode : server.getPostcodes()) {
-                            psb.append(postcode.getCode());
-                            psb.append(",");
-                            psb.append(postcode.getDistance());
-                            psb.append(":");
+                        if (server.getPostcodes() != currentPostcodes) {
+                            StringBuilder psb = new StringBuilder();
+                            psb.append("POSTCODE All:");
+                            for (Postcode postcode : server.getPostcodes()) {
+                                psb.append(postcode.getCode());
+                                psb.append(",");
+                                psb.append(postcode.getDistance());
+                                psb.append(":");
+                            }
+                            currentPostcodes = server.getPostcodes();
+                            os.println(psb.toString());
+                        } else {
+                            os.println("POSTCODE No change");
                         }
-                        os.println(psb.toString());
+
                     }
                 } else if (message[0].startsWith("DISH")) {
                     // FETCH ALL DISHES
                     if (message[0].contains("Fetch")) {
 
                         StringBuilder dsb = new StringBuilder();
-                        dsb.append("DISH ALL:");
+                        dsb.append("DISH All:");
                         for (Dish dish : server.getDishes()) {
                             dsb.append(dish.getName());
                             dsb.append(",");

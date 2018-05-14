@@ -129,7 +129,7 @@ public class Configuration {
                             server.addStaff(strings[1]);
 
                             break;
-                        case "DRONE:":
+                        case "DRONE":
 
                             server.addDrone(Integer.parseInt(strings[1]));
 

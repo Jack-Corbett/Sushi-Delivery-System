@@ -10,9 +10,13 @@ import java.util.Map;
 public class Client implements ClientInterface {
 
     private CommsClient comms;
+    private ArrayList<Postcode> postcodes;
 
     public Client() {
         comms = new CommsClient();
+        postcodes = new ArrayList<>();
+        // This removes the initial acknowledgment method from the queue
+        comms.receiveMessage();
     }
 
     @Override
@@ -36,7 +40,7 @@ public class Client implements ClientInterface {
         String[] response = comms.receiveMessage().split(":");
 
         if (response[0].equals("SUCCESS Login")) {
-            user = new User(username, password, response[3], new Postcode(response[4], Integer.parseInt(response[5])));
+            user = new User(username, password, response[1], new Postcode(response[2], Integer.parseInt(response[3])));
             return user;
         } else {
             System.err.println("Login failed");
@@ -49,18 +53,23 @@ public class Client implements ClientInterface {
         comms.sendMessage("POSTCODE Fetch");
         String[] response = comms.receiveMessage().split(":");
         String[] details;
-        List<Postcode> postcodes = new ArrayList<>();
 
-        if (response[0].equals("POSTCODE All")) {
-            for (int i = 1; i < response.length; i++) {
-                details = response[i].split(",");
-                postcodes.add(new Postcode(details[0], Integer.parseInt(details[1])));
-            }
-            return postcodes;
-        } else {
-            System.err.println("Postcode fetch failed");
+        switch (response[0]) {
+            case "POSTCODE No change":
+                return postcodes;
+
+            case "POSTCODE All":
+                postcodes.clear();
+                for (int i = 1; i < response.length; i++) {
+                    details = response[i].split(",");
+                    postcodes.add(new Postcode(details[0], Integer.parseInt(details[1])));
+                }
+                return postcodes;
+
+            default:
+                System.err.println("Postcode fetch failed");
+                return new ArrayList<>();
         }
-        return null;
     }
 
     @Override
@@ -159,35 +168,37 @@ public class Client implements ClientInterface {
     // USER Orders:Name.Desc.Price.RestockThreshold.RestockAmount * 5,Name.Desc.Price.RestockThreshold.RestockAmount * 5:Next order...
     @Override
     public List<Order> getOrders(User user) {
-        comms.sendMessage("USER Get orders");
-        String[] response = comms.receiveMessage().split(":");
-        String[] stringOrders;
-        String[] orderElements;
-        String[] dishDetails;
-        ArrayList<Order> orders = new ArrayList<>();
+        if (user != null) {
+            comms.sendMessage("USER Get orders");
+            String[] response = comms.receiveMessage().split(":");
+            String[] stringOrders;
+            String[] orderElements;
+            String[] dishDetails;
+            ArrayList<Order> orders = new ArrayList<>();
 
-        if (response[0].equals("USER Orders")) {
-            for (int i = 1; i < response.length; i++) {
-                stringOrders = response[i].split(",");
+            if (response[0].equals("USER Orders")) {
+                for (int i = 1; i < response.length; i++) {
+                    stringOrders = response[i].split(",");
 
-                // Create the hash map
-                HashMap<Dish, Number> orderItems = new HashMap<>();
+                    // Create the hash map
+                    HashMap<Dish, Number> orderItems = new HashMap<>();
 
-                for (String stringOrder : stringOrders) {
-                    orderElements = stringOrder.split(" * ");
-                    dishDetails = orderElements[0].split(".");
-                    orderItems.put(new Dish(dishDetails[0], dishDetails[1], Double.parseDouble(dishDetails[2]),
-                                    Integer.parseInt(dishDetails[3]), Integer.parseInt(dishDetails[4])),
-                            Integer.parseInt(orderElements[1]));
+                    for (String stringOrder : stringOrders) {
+                        orderElements = stringOrder.split(" * ");
+                        dishDetails = orderElements[0].split(".");
+                        orderItems.put(new Dish(dishDetails[0], dishDetails[1], Double.parseDouble(dishDetails[2]),
+                                        Integer.parseInt(dishDetails[3]), Integer.parseInt(dishDetails[4])),
+                                Integer.parseInt(orderElements[1]));
+                    }
+                    orders.add(new Order(user, orderItems));
                 }
-                orders.add(new Order(user, orderItems));
+                user.setOrders(orders);
+                return user.getOrders();
+            } else {
+                System.err.println("Fetching orders failed");
             }
-            user.setOrders(orders);
-            return user.getOrders();
-        } else {
-            System.err.println("Fetching orders failed");
         }
-        return null;
+        return new ArrayList<>();
     }
 
     @Override

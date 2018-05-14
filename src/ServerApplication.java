@@ -1,6 +1,8 @@
 import server.Server;
 import server.ServerWindow;
 
+import java.io.FileNotFoundException;
+
 public class ServerApplication {
 
     public static void main(String args[]) {
@@ -10,12 +12,16 @@ public class ServerApplication {
     }
 
     private Server initialise() {
-        return new Server();
+        Server server = new Server();
+        try {
+            server.loadConfiguration("config.txt");
+        } catch (FileNotFoundException e) {
+            System.err.println("Failed to load configuration");
+        }
+        return server;
     }
 
     private void launchGUI(Server server) {
         new ServerWindow(server);
     }
-
-
 }
