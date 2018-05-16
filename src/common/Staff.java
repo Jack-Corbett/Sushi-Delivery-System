@@ -2,16 +2,27 @@ package common;
 
 import server.Server;
 
+/**
+ * A staff member that is responsible for preparing more dishes when required.
+ * @author Jack Corbett
+ */
 public class Staff extends Model implements Runnable {
 
     private String status;
     private Boolean working;
-    // References to stock controllers
+    // References to stock controllers and server
     private IngredientStock ingredientStock;
     private DishStock dishStock;
     private Server server;
 
-    public Staff(Server server, String name, IngredientStock ingredientStock, DishStock dishStock) {
+    /**
+     * Create a new staff members setting their properties.
+     * @param server Reference to the server object
+     * @param name Name of the staff member, which is also used to identify them
+     * @param dishStock Reference to the dish stock controller
+     * @param ingredientStock Reference to the ingredient stock controller
+     */
+    public Staff(Server server, String name,  DishStock dishStock, IngredientStock ingredientStock) {
         setName(name);
         status = "Idle";
         working = true;
@@ -20,6 +31,9 @@ public class Staff extends Model implements Runnable {
         this.server = server;
     }
 
+    /**
+     * Loops checking to see if any dishes need to be prepared.
+     */
     @Override
     public void run() {
         while (working) {
@@ -39,7 +53,7 @@ public class Staff extends Model implements Runnable {
                         makeDish = false;
                     }
                 }
-                // If there are enough ingredients prepare the dish
+                // If there are enough ingredients prepare the dish otherwise put the dish back in the queue
                 if (makeDish) {
                     prepareDish(dish);
                 } else {
@@ -54,6 +68,10 @@ public class Staff extends Model implements Runnable {
         }
     }
 
+    /**
+     * Prepare a single dish to be added to the stock system.
+     * @param dish The dish to make
+     */
     private void prepareDish(Dish dish) {
         try {
             status = "Preparing " + dish.getName();
@@ -65,7 +83,7 @@ public class Staff extends Model implements Runnable {
             Thread.sleep((long) (Math.random() * 60000 + 20000));
 
             // Add the newly prepared dish to the stock system
-            dishStock.addStock(dish, 1);
+            dishStock.addStock(dish);
 
             status = "Idle";
             notifyUpdate();
@@ -74,11 +92,17 @@ public class Staff extends Model implements Runnable {
         }
     }
 
+    /**
+     * @return Staff members name
+     */
     @Override
     public String getName() {
         return name;
     }
 
+    /**
+     * @return Staff members current status
+     */
     public String getStatus() {
         return status;
     }

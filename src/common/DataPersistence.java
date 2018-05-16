@@ -7,10 +7,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * Maintain a local file copy of the current system state so it can be restored in the event of a failure.
+ * @author Jack Corbett
+ */
 public class DataPersistence {
 
+    /**
+     * Backup the servers current state by writing to a backup text file. This follows the same format as the
+     * configuration file to make it easy to load in the event the system needs to be restarted.
+     * @param server Reference to the server object
+     */
     public void backup(Server server) {
         try {
+            // Setup a writer to the file
             BufferedWriter writer = new BufferedWriter(new FileWriter("backup.txt", false));
             StringBuilder sb = new StringBuilder();
 
@@ -137,6 +147,7 @@ public class DataPersistence {
                 sb.append(drone.getSpeed());
             }
 
+            // Write the contents of the string builder to the file
             writer.append(sb);
             writer.close();
         } catch (IOException e) {

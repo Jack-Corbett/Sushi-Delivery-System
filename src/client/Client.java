@@ -4,20 +4,33 @@ import common.*;
 
 import java.util.*;
 
+/**
+ * Client class responsible for implementing the ClientInterface and using the CommsClient class to send and receive
+ * messages from the server.
+ * @author Jack Corbett
+ */
 public class Client implements ClientInterface {
 
-    private CommsClient comms;
-    private ArrayList<Postcode> postcodes;
-    private ArrayList<UpdateListener> updateListeners;
+    private CommsClient comms = new CommsClient();
+    private ArrayList<Postcode> postcodes = new ArrayList<>();
+    private ArrayList<UpdateListener> updateListeners = new ArrayList<>();
 
+    /**
+     * Constructor to instantiate the communication class and array lists
+     */
     public Client() {
-        comms = new CommsClient();
-        updateListeners = new ArrayList<>();
-        postcodes = new ArrayList<>();
         // This removes the initial acknowledgment method from the queue
         comms.receiveMessage();
     }
 
+    /**
+     * Add a new user to the system
+     * @param username username
+     * @param password password
+     * @param address address
+     * @param postcode valid postcode
+     * @return The newly registered user, if the registration succeeds.
+     */
     @Override
     public User register(String username, String password, String address, Postcode postcode) {
         comms.sendMessage("USER Register:" + username + ":" + password + ":" + address + ":" + postcode.getName());
@@ -32,6 +45,12 @@ public class Client implements ClientInterface {
         return null;
     }
 
+    /**
+     * Log the user in by starting a new thread on the server
+     * @param username username
+     * @param password password
+     * @return The logged in user, if the login succeeds.
+     */
     @Override
     public User login(String username, String password) {
         comms.sendMessage("USER Login:" + username + ":" + password);
@@ -47,6 +66,10 @@ public class Client implements ClientInterface {
         return null;
     }
 
+    /**
+     * Fetch all the postcodes currently registered on the server.
+     * @return A list of all postcodes.
+     */
     @Override
     public List<Postcode> getPostcodes() {
         comms.sendMessage("POSTCODE Fetch");
@@ -71,6 +94,10 @@ public class Client implements ClientInterface {
         }
     }
 
+    /**
+     * Fetch a list of all dishes currently listed in the stock system
+     * @return A list of dishes.
+     */
     @Override
     public List<Dish> getDishes() {
         comms.sendMessage("DISH Fetch");
@@ -91,21 +118,37 @@ public class Client implements ClientInterface {
         return null;
     }
 
+    /**
+     * @param dish Dish to lookup
+     * @return The text description of the passed dish.
+     */
     @Override
     public String getDishDescription(Dish dish) {
         return dish.getDescription();
     }
 
+    /**
+     * @param dish Dish to lookup
+     * @return The price of the passed dish.
+     */
     @Override
     public Number getDishPrice(Dish dish) {
         return dish.getPrice();
     }
 
+    /**
+     * @param user user to lookup
+     * @return The collection of items in the users basket.
+     */
     @Override
     public Map<Dish, Number> getBasket(User user) {
         return user.getBasket();
     }
 
+    /**
+     * @param user user to lookup basket
+     * @return The cost of all the items in the users basket summed.
+     */
     @Override
     public Number getBasketCost(User user) {
         Double totalCost = 0.0;
@@ -116,6 +159,12 @@ public class Client implements ClientInterface {
         return totalCost;
     }
 
+    /**
+     * Adds a dish to the users basket.
+     * @param user user of basket
+     * @param dish dish to change
+     * @param quantity quantity to set
+     */
     @Override
     public void addDishToBasket(User user, Dish dish, Number quantity) {
         comms.sendMessage("USER Add to basket:" + dish.getName() + ":" + quantity);
@@ -127,6 +176,12 @@ public class Client implements ClientInterface {
         }
     }
 
+    /**
+     * Updates an item that is already in the users basket.
+     * @param user user of basket
+     * @param dish dish to change
+     * @param quantity quantity to set. 0 should remove.
+     */
     @Override
     public void updateDishInBasket(User user, Dish dish, Number quantity) {
         comms.sendMessage("USER Update basket:" + dish.getName() + ":" + quantity);
@@ -138,6 +193,11 @@ public class Client implements ClientInterface {
         }
     }
 
+    /**
+     * Creates an order.
+     * @param user user of basket
+     * @return The new order object created with the users current basket.
+     */
     @Override
     public Order checkoutBasket(User user) {
         comms.sendMessage("USER Checkout:");
@@ -153,6 +213,10 @@ public class Client implements ClientInterface {
         return null;
     }
 
+    /**
+     * Removes all items from the users basket.
+     * @param user user of basket
+     */
     @Override
     public void clearBasket(User user) {
         comms.sendMessage("USER Clear basket:" + user.getName());
@@ -164,7 +228,11 @@ public class Client implements ClientInterface {
         }
     }
 
-    // USER Orders:Name.Desc.Price.RestockThreshold.RestockAmount * 5,Name.Desc.Price.RestockThreshold.RestockAmount * 5:Next order...
+    /**
+     * Fetch all the orders to be displayed in the UI.
+     * @param user user to lookup
+     * @return A list of all the orders for the given user.
+     */
     @Override
     public List<Order> getOrders(User user) {
         if (user != null) {
@@ -198,6 +266,10 @@ public class Client implements ClientInterface {
         return new ArrayList<>();
     }
 
+    /**
+     * @param order order to lookup
+     * @return If the order has been completed (delivered by a drone to the user)
+     */
     @Override
     public boolean isOrderComplete(Order order) {
         comms.sendMessage("ORDER Is complete:" + order.getName());
@@ -215,6 +287,10 @@ public class Client implements ClientInterface {
         return false;
     }
 
+    /**
+     * @param order order to lookup
+     * @return The status text. Example data includes: Processing, Completed
+     */
     @Override
     public String getOrderStatus(Order order) {
         comms.sendMessage("ORDER Get status:" + order.getName());
@@ -229,11 +305,20 @@ public class Client implements ClientInterface {
         return null;
     }
 
+    /**
+     * @param order to lookup
+     * @return The cost of a given order.
+     */
     @Override
     public Number getOrderCost(Order order) {
         return order.getCost();
     }
 
+    /**
+     * Cancels an order which will prevent it from being fulfilled, although if it has already been completed it
+     * will have no effect.
+     * @param order to cancel
+     */
     @Override
     public void cancelOrder(Order order) {
         comms.sendMessage("ORDER Cancel:" + order.getName());

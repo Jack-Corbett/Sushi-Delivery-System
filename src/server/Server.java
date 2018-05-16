@@ -226,7 +226,7 @@ public class Server implements ServerInterface {
 
     @Override
     public Staff addStaff(String name) {
-        Staff staffMember = new Staff(this, name, is, ds);
+        Staff staffMember = new Staff(this, name, ds, is);
         new Thread(staffMember).start();
         staff.add(staffMember);
         return staffMember;
@@ -314,5 +314,6 @@ public class Server implements ServerInterface {
         for (UpdateListener updateListener : updateListeners) {
             updateListener.updated(new UpdateEvent());
         }
+        dataPersistence.backup(this);
     }
 }
