@@ -8,6 +8,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Server implements ServerInterface {
 
+    DataPersistence dataPersistence = new DataPersistence();
+
     // STORE OBJECT REFERENCES
     public IngredientStock is = new IngredientStock(this);
     private DishStock ds = new DishStock(this);
@@ -20,16 +22,16 @@ public class Server implements ServerInterface {
 
     public ArrayList<Order> orders = new ArrayList<>();
     public ConcurrentLinkedQueue<Order> orderQueue = new ConcurrentLinkedQueue<>();
-    //public ArrayList<Order> completedOrders = new ArrayList<>();
 
     public ConcurrentLinkedQueue<Ingredient> restockIngredientQueue = new ConcurrentLinkedQueue<>();
 
     public ConcurrentLinkedQueue<Dish> restockDishQueue = new ConcurrentLinkedQueue<>();
 
-    private UpdateListener updateListener;
+    private ArrayList<UpdateListener> updateListeners = new ArrayList<>();
 
     public Server() {
         new CommsServer(this);
+
     }
 
     @Override
@@ -52,6 +54,7 @@ public class Server implements ServerInterface {
     @Override
     public void setStock(Dish dish, Number stock) {
         ds.setStockLevel(dish, stock);
+        notifyUpdate();
     }
 
     @Override
@@ -303,11 +306,13 @@ public class Server implements ServerInterface {
 
     @Override
     public void addUpdateListener(UpdateListener listener) {
-        this.updateListener = listener;
+        updateListeners.add(listener);
     }
 
     @Override
     public void notifyUpdate() {
-        updateListener.updated(new UpdateEvent());
+        for (UpdateListener updateListener : updateListeners) {
+            updateListener.updated(new UpdateEvent());
+        }
     }
 }

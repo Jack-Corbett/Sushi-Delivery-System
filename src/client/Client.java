@@ -8,10 +8,11 @@ public class Client implements ClientInterface {
 
     private CommsClient comms;
     private ArrayList<Postcode> postcodes;
-    private UpdateListener updateListener;
+    private ArrayList<UpdateListener> updateListeners;
 
     public Client() {
         comms = new CommsClient();
+        updateListeners = new ArrayList<>();
         postcodes = new ArrayList<>();
         // This removes the initial acknowledgment method from the queue
         comms.receiveMessage();
@@ -246,11 +247,13 @@ public class Client implements ClientInterface {
 
     @Override
     public void addUpdateListener(UpdateListener listener) {
-        this.updateListener = listener;
+        updateListeners.add(listener);
     }
 
     @Override
     public void notifyUpdate() {
-        updateListener.updated(new UpdateEvent());
+        for (UpdateListener updateListener : updateListeners) {
+            updateListener.updated(new UpdateEvent());
+        }
     }
 }
