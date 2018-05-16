@@ -17,8 +17,10 @@ public class Server implements ServerInterface {
     private ArrayList<Drone> drones = new ArrayList<>();
 
     public ArrayList<User> users = new ArrayList<>();
+
+    public ArrayList<Order> orders = new ArrayList<>();
     public ConcurrentLinkedQueue<Order> orderQueue = new ConcurrentLinkedQueue<>();
-    public ArrayList<Order> completedOrders = new ArrayList<>();
+    //public ArrayList<Order> completedOrders = new ArrayList<>();
 
     public ConcurrentLinkedQueue<Ingredient> restockIngredientQueue = new ConcurrentLinkedQueue<>();
 
@@ -241,16 +243,13 @@ public class Server implements ServerInterface {
 
     @Override
     public List<Order> getOrders() {
-        List<Order> orders = new ArrayList<>();
-        orders.addAll(orderQueue);
-        orders.addAll(completedOrders);
         return orders;
     }
 
     @Override
     public void removeOrder(Order order) throws UnableToDeleteException {
         orderQueue.remove(order);
-        completedOrders.remove(order);
+        orders.remove(order);
     }
 
     @Override

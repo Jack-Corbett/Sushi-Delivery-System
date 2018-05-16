@@ -21,11 +21,13 @@ public class DishStock {
             while (running) {
                 if (restockingEnabled) {
                     for (Dish dish : stock.keySet()) {
-                        if (stock.get(dish).intValue() < dish.getRestockThreshold().intValue()) {
-                            if (!dish.restocking) {
-                                System.out.println("Added: " + dish.getName());
-                                server.restockDishQueue.add(dish);
-                                dish.restocking = true;
+                        if (stock.get(dish).intValue() < dish.getRestockThreshold().intValue() + dish.getRestockAmount().intValue()) {
+                            if (dish.noRestocking == 0 ||
+                                    stock.get(dish).intValue() + dish.noRestocking < dish.getRestockThreshold().intValue() + dish.getRestockAmount().intValue()) {
+                                if (!server.restockDishQueue.contains(dish)) {
+                                    server.restockDishQueue.add(dish);
+                                    dish.noRestocking ++;
+                                }
                             }
                         }
                     }
@@ -33,7 +35,7 @@ public class DishStock {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
-                    System.err.println("Failed to wait before checking ingredient stock");
+                    System.err.println("Failed to wait before checking dish stock");
                 }
             }
         });
@@ -62,6 +64,7 @@ public class DishStock {
 
     public void addStock(Dish dish, Number amount) {
         stock.put(dish, stock.getOrDefault(dish, 0).intValue() + amount.intValue());
+        if (dish.noRestocking > 0) dish.noRestocking --;
     }
 
     public void removeDish(Dish dish) {

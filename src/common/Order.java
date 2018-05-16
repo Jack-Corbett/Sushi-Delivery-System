@@ -1,16 +1,16 @@
 package common;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class Order extends Model {
 
     private User user;
-    private HashMap<Dish, Number> items;
+    private LinkedHashMap<Dish, Number> items;
     private Boolean complete;
     private Boolean cancelled;
     private String status;
 
-    public Order(User user, HashMap<Dish, Number> items) {
+    public Order(User user, LinkedHashMap<Dish, Number> items) {
         this.items = items;
         this.user = user;
         setName(getUser() + " " + items.toString());
@@ -23,7 +23,7 @@ public class Order extends Model {
         return user;
     }
 
-    public HashMap<Dish, Number> getItems() {
+    public LinkedHashMap<Dish, Number> getItems() {
         return items;
     }
 

@@ -60,14 +60,13 @@ public class Staff extends Model implements Runnable {
             notifyUpdate();
 
             // Remove the ingredients used from the stock system
-            ingredientStock.removeStock(dish.getRecipe(), dish.getRestockAmount());
+            ingredientStock.removeStock(dish.getRecipe());
 
             Thread.sleep((long) (Math.random() * 60000 + 20000));
 
             // Add the newly prepared dish to the stock system
-            dishStock.addStock(dish, dish.getRestockAmount());
+            dishStock.addStock(dish, 1);
 
-            dish.restocking = false;
             status = "Idle";
             notifyUpdate();
         } catch (Exception e) {

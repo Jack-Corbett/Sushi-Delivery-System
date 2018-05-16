@@ -10,7 +10,7 @@ public class Dish extends Model {
     private Integer restockThreshold;
     private Integer restockAmount;
     private Map<Ingredient, Number> recipe;
-    boolean restocking;
+    int noRestocking;
 
     public Dish(String name, String description, Double price, Integer restockThreshold, Integer restockAmount) {
         super.setName(name);
@@ -19,7 +19,7 @@ public class Dish extends Model {
         this.restockThreshold = restockThreshold;
         this.restockAmount = restockAmount;
         recipe = new HashMap<>();
-        restocking = false;
+        noRestocking = 0;
     }
 
     @Override

@@ -6,7 +6,7 @@ public class Ingredient extends Model {
     private Supplier supplier;
     private Integer restockAmount;
     private Integer restockThreshold;
-    boolean restocking;
+    int noRestocking;
 
     public Ingredient(String name, String unit, Supplier supplier, Integer restockThreshold, Integer restockAmount) {
         super.setName(name);
@@ -14,7 +14,7 @@ public class Ingredient extends Model {
         this.supplier = supplier;
         this.restockThreshold = restockThreshold;
         this.restockAmount = restockAmount;
-        restocking = false;
+        noRestocking = 0;
     }
 
     @Override

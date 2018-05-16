@@ -7,6 +7,7 @@ import common.User;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -119,9 +120,11 @@ class CommsServerThread extends Thread {
                         // CHECKOUT BASKET
                     } else if (message[0].contains("Checkout")) {
 
-                        Order order = new Order(user, user.getBasket());
+                        LinkedHashMap<Dish, Number> items = new LinkedHashMap<>();
+                        items.putAll(user.getBasket());
+                        Order order = new Order(user, items);
+                        server.orders.add(order);
                         server.orderQueue.add(order);
-                        user.orders.add(order);
                         user.clearBasket();
                         os.println("SUCCESS Order created");
 
@@ -137,27 +140,26 @@ class CommsServerThread extends Thread {
                         StringBuilder osb = new StringBuilder();
                         osb.append("USER Orders:");
                         if (user != null) {
-                            for (Order order : user.getOrders()) {
-
-                                // NOT LOOPING
-                                for (Map.Entry<Dish, Number> entry : order.getItems().entrySet()) {
-                                    System.out.println("I RAN");
-                                    Dish dish = entry.getKey();
-                                    Number amount = entry.getValue();
-                                    osb.append(dish.getName());
-                                    osb.append(".");
-                                    osb.append(dish.getDescription());
-                                    osb.append(".");
-                                    osb.append(dish.getPrice());
-                                    osb.append(".");
-                                    osb.append(dish.getRestockThreshold());
-                                    osb.append(".");
-                                    osb.append(dish.getRestockAmount());
-                                    osb.append(" * ");
-                                    osb.append(amount);
-                                    osb.append(",");
+                            for (Order order : server.getOrders()) {
+                                if (order.getUser().equals(user)) {
+                                    for (Map.Entry<Dish, Number> entry : order.getItems().entrySet()) {
+                                        Dish dish = entry.getKey();
+                                        Number amount = entry.getValue();
+                                        osb.append(dish.getName());
+                                        osb.append("/");
+                                        osb.append(dish.getDescription());
+                                        osb.append("/");
+                                        osb.append(dish.getPrice());
+                                        osb.append("/");
+                                        osb.append(dish.getRestockThreshold());
+                                        osb.append("/");
+                                        osb.append(dish.getRestockAmount());
+                                        osb.append("/");
+                                        osb.append(amount);
+                                        osb.append(",");
+                                    }
+                                    osb.append(":");
                                 }
-                                osb.append(":");
                             }
                         }
                         os.println(osb.toString());
@@ -209,7 +211,7 @@ class CommsServerThread extends Thread {
                     if (message[0].contains("Is complete")) {
 
                         Order orderToCheck = null;
-                        for (Order order : user.getOrders()) {
+                        for (Order order : server.getOrders()) {
                             if (order.getName().equals(message[1])) orderToCheck = order;
                         }
 
@@ -227,7 +229,7 @@ class CommsServerThread extends Thread {
                     } else if (message[0].contains("Get status")) {
 
                         Order orderToCheck = null;
-                        for (Order order : user.getOrders()) {
+                        for (Order order : server.getOrders()) {
                             if (order.getName().equals(message[1])) orderToCheck = order;
                         }
 
@@ -241,14 +243,13 @@ class CommsServerThread extends Thread {
                     } else if (message[0].contains("Cancel")) {
 
                         Order orderToCheck = null;
-                        for (Order order : user.getOrders()) {
+                        for (Order order : server.getOrders()) {
                             if (order.getName().equals(message[1])) orderToCheck = order;
                         }
 
                         if (orderToCheck != null) {
                             orderToCheck.setCancelled();
                             server.orderQueue.remove(orderToCheck);
-                            server.completedOrders.remove(orderToCheck);
                             os.println("SUCCESS Cancelled");
                         } else {
                             os.println("FAILED");

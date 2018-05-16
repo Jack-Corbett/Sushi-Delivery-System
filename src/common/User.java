@@ -1,15 +1,13 @@
 package common;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class User extends Model {
 
     private String password;
     private String address;
     private Postcode postcode;
-    public HashMap<Dish, Number> basket = new HashMap<>();
-    public ArrayList<Order> orders = new ArrayList<>();
+    private LinkedHashMap<Dish, Number> basket = new LinkedHashMap<>();
 
     public User(String username, String password, String address, Postcode postcode) {
         setName(username);
@@ -22,16 +20,8 @@ public class User extends Model {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getAddress() {
         return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
     }
 
     public Postcode getPostcode() {
@@ -44,7 +34,7 @@ public class User extends Model {
         notifyUpdate("postcode", oldPostcode, this.postcode);
     }
 
-    public HashMap<Dish, Number> getBasket() {
+    public LinkedHashMap<Dish, Number> getBasket() {
         return basket;
     }
 
@@ -55,15 +45,6 @@ public class User extends Model {
 
     public void clearBasket() {
         basket.clear();
-        notifyUpdate();
-    }
-
-    public ArrayList<Order> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(ArrayList<Order> orders) {
-        this.orders = orders;
         notifyUpdate();
     }
 

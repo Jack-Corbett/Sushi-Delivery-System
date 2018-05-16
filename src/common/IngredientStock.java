@@ -23,10 +23,12 @@ public class IngredientStock {
                 if (restockingEnabled) {
                     for (Ingredient ingredient : stock.keySet()) {
                         if (stock.get(ingredient).intValue() < ingredient.getRestockThreshold()) {
-                            if (!ingredient.restocking) {
-                                System.out.println("Added: " + ingredient.getName());
-                                server.restockIngredientQueue.add(ingredient);
-                                ingredient.restocking = true;
+                            if (ingredient.noRestocking == 0 || stock.get(ingredient).intValue() +
+                                    (ingredient.getRestockAmount() * ingredient.noRestocking) < ingredient.getRestockThreshold()) {
+                                if (!server.restockIngredientQueue.contains(ingredient)) {
+                                    server.restockIngredientQueue.add(ingredient);
+                                    ingredient.noRestocking ++;
+                                }
                             }
                         }
                     }
@@ -63,20 +65,20 @@ public class IngredientStock {
 
     public void addStock(Ingredient ingredient, Number amount) {
         stock.put(ingredient, stock.getOrDefault(ingredient, 0).intValue() + amount.intValue());
+        if (ingredient.noRestocking > 0) ingredient.noRestocking --;
     }
 
     public void removeStock(Ingredient ingredient) {
         stock.put(ingredient, stock.get(ingredient).intValue() - 1);
     }
 
-    public void removeStock(Map<Ingredient, Number> recipe, Number numberOfDishes) {
+    public void removeStock(Map<Ingredient, Number> recipe) {
         for (Map.Entry<Ingredient, Number> entry : recipe.entrySet()) {
             Ingredient ingredient = entry.getKey();
             Number amountUsed = entry.getValue();
 
             if (stock.containsKey(ingredient)) {
-                stock.put(ingredient, stock.get(ingredient).intValue() -
-                        (amountUsed.intValue() * numberOfDishes.intValue()));
+                stock.put(ingredient, stock.get(ingredient).intValue() - amountUsed.intValue());
             } else {
                 System.err.println("Ingredient not found in stock system");
             }

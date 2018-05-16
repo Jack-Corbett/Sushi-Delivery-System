@@ -42,7 +42,6 @@ public class Drone extends Model implements Runnable {
                 if (deliver) {
                     status = "Delivering: " + order.getName();
                     notifyUpdate();
-                    System.out.println(status);
                     try {
                         Thread.sleep((order.getDistance() / speed) + 5000);
 
@@ -54,7 +53,6 @@ public class Drone extends Model implements Runnable {
                             }
                         }
                         order.setComplete();
-                        server.completedOrders.add(order);
                     } catch (InterruptedException e) {
                         System.err.println("Drone failed to deliver order: " + order.getName());
                     }
@@ -78,7 +76,6 @@ public class Drone extends Model implements Runnable {
                 } catch (InterruptedException e) {
                     System.err.println("Drone failed to restock ingredient: " + ingredient.getName());
                 }
-                ingredient.restocking = false;
                 status = "Idle";
                 notifyUpdate();
             }

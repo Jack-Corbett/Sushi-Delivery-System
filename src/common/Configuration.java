@@ -4,6 +4,7 @@ import server.Server;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class Configuration {
 
@@ -80,7 +81,7 @@ public class Configuration {
                             break;
                         case "ORDER":
 
-                            HashMap<Dish, Number> order = new HashMap<>();
+                            LinkedHashMap<Dish, Number> order = new LinkedHashMap<>();
 
                             String[] orderElements = strings[2].split(",");
 
@@ -102,7 +103,9 @@ public class Configuration {
                                 if (user.getName().equals(strings[1])) orderUser = user;
                             }
 
-                            server.orderQueue.add(new Order(orderUser, order));
+                            Order newOrder = new Order(orderUser, order);
+                            server.orders.add(newOrder);
+                            server.orderQueue.add(newOrder);
 
                             break;
                         case "STOCK":

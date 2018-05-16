@@ -2,10 +2,7 @@ package client;
 
 import common.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Client implements ClientInterface {
 
@@ -142,11 +139,11 @@ public class Client implements ClientInterface {
 
     @Override
     public Order checkoutBasket(User user) {
-        comms.sendMessage("USER Checkout:" + user.getName());
+        comms.sendMessage("USER Checkout:");
 
         if (comms.receiveMessage().equals("SUCCESS Order created")) {
+            System.out.println(user.getBasket().toString());
             Order order = new Order(user, user.getBasket());
-            user.orders.add(order);
             user.clearBasket();
             return order;
         } else {
@@ -170,31 +167,29 @@ public class Client implements ClientInterface {
     @Override
     public List<Order> getOrders(User user) {
         if (user != null) {
-            comms.sendMessage("USER Get orders");
+            comms.sendMessage("USER Get orders:" + user.getName());
             String[] response = comms.receiveMessage().split(":");
-            String[] stringOrders;
-            String[] orderElements;
-            String[] dishDetails;
+            String[] dishes;
+            String[] dishInfo;
             ArrayList<Order> orders = new ArrayList<>();
 
             if (response[0].equals("USER Orders")) {
                 for (int i = 1; i < response.length; i++) {
-                    stringOrders = response[i].split(",");
+                    // Split into each dish
+                    dishes = response[i].split(",");
 
                     // Create the hash map
-                    HashMap<Dish, Number> orderItems = new HashMap<>();
+                    LinkedHashMap<Dish, Number> orderItems = new LinkedHashMap<>();
 
-                    for (String stringOrder : stringOrders) {
-                        orderElements = stringOrder.split(" \\* ");
-                        dishDetails = orderElements[0].split(".");
-                        orderItems.put(new Dish(dishDetails[0], dishDetails[1], Double.parseDouble(dishDetails[2]),
-                                        Integer.parseInt(dishDetails[3]), Integer.parseInt(dishDetails[4])),
-                                Integer.parseInt(orderElements[1]));
+                    for (String dish : dishes) {
+                        dishInfo = dish.split("/");
+                        orderItems.put(new Dish(dishInfo[0], dishInfo[1], Double.parseDouble(dishInfo[2]),
+                                        Integer.parseInt(dishInfo[3]), Integer.parseInt(dishInfo[4])),
+                                Integer.parseInt(dishInfo[5]));
                     }
                     orders.add(new Order(user, orderItems));
                 }
-                user.setOrders(orders);
-                return user.getOrders();
+                return orders;
             } else {
                 System.err.println("Fetching orders failed");
             }
