@@ -21,7 +21,7 @@ public class DataPersistence {
     public void backup(Server server) {
         try {
             // Setup a writer to the file
-            BufferedWriter writer = new BufferedWriter(new FileWriter("backup.txt", false));
+            BufferedWriter writer = new BufferedWriter(new FileWriter("src/common/backup.txt", false));
             StringBuilder sb = new StringBuilder();
 
             for (Supplier supplier : server.getSuppliers()) {
@@ -145,6 +145,7 @@ public class DataPersistence {
             for (Drone drone : server.getDrones()) {
                 sb.append("DRONE:");
                 sb.append(drone.getSpeed());
+                sb.append("\n");
             }
 
             // Write the contents of the string builder to the file

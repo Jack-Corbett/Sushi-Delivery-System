@@ -40,7 +40,7 @@ public class Ingredient extends Model {
     /**
      * @return The supplier that the ingredient can be restocked from
      */
-    Supplier getSupplier() {
+    public Supplier getSupplier() {
         return supplier;
     }
 

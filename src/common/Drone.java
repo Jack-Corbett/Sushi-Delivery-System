@@ -60,7 +60,8 @@ public class Drone extends Model implements Runnable {
                     status = "Delivering: " + order.getName();
                     notifyUpdate();
                     try {
-                        Thread.sleep(((long)order.getDistance() /  (long)speed) * 10000);
+                        // Add 5 seconds to factor for loading and offloading dishes
+                        Thread.sleep((((long)order.getDistance() /  (long)speed) * 20000) + 5000);
 
                         for (Map.Entry<Dish, Number> entry : order.getItems().entrySet()) {
                             Dish dish = entry.getKey();
@@ -86,9 +87,8 @@ public class Drone extends Model implements Runnable {
             if (ingredient != null) {
                 status = "Restocking: " + ingredient.getName();
                 notifyUpdate();
-                System.out.println(status);
                 try {
-                    Thread.sleep(((long) ingredient.getSupplier().getDistance() / (long) speed) * 10000);
+                    Thread.sleep(((long) ingredient.getSupplier().getDistance() / (long) speed) * 20000);
                     is.addStock(ingredient, ingredient.getRestockAmount());
                 } catch (InterruptedException e) {
                     System.err.println("Drone failed to restock ingredient: " + ingredient.getName());

@@ -4,7 +4,7 @@ import server.ServerWindow;
 import java.io.FileNotFoundException;
 
 /**
- *
+ * The main class that starts the server which clients can connect to in order to order sushi.
  * @author Jack Corbett
  */
 public class ServerApplication {
@@ -17,6 +17,7 @@ public class ServerApplication {
 
     private Server initialise() {
         Server server = new Server();
+        // Call load configuration to set up objects
         try {
             server.loadConfiguration("config.txt");
         } catch (FileNotFoundException e) {

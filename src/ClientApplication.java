@@ -1,6 +1,10 @@
 import client.Client;
 import client.ClientWindow;
 
+/**
+ * The main class that starts a client which can be used to place sushi orders
+ * @author Jack Corbett
+ */
 public class ClientApplication {
 
     public static void main(String[] args) {

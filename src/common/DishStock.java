@@ -35,23 +35,22 @@ public class DishStock {
 
                     // Check each dish currently in the stock system
                     for (Dish dish : stock.keySet()) {
-                        // If the stock level is below the required level
-                        if (stock.get(dish).intValue() < dish.getRestockThreshold().intValue() +
-                                dish.getRestockAmount().intValue()) {
+                        // If the stock level is below the required level or restocking is triggered
+                        if (stock.get(dish).intValue() <= dish.getRestockThreshold().intValue() ||
+                                dish.noRestocking > 0) {
 
-                            /* If no drone is currently restocking then add it to the restock queue OR if the drones
-                               that are currently restocking won't reach the required level also add to the queue*/
-                            if (dish.noRestocking == 0 ||
-                                    stock.get(dish).intValue() + dish.noRestocking <
+                            /* If the staff that are currently restocking won't reach the required level also
+                            add to the queue*/
+                            if (stock.get(dish).intValue() + dish.noRestocking <
                                             dish.getRestockThreshold().intValue() +
                                                     dish.getRestockAmount().intValue()) {
 
                                 /* Check it isn't already in the queue.
-                                (this could happen if no drone had started restocking it but it had already been
+                                (this could happen if no staff had started restocking it but it had already been
                                 flagged for restocking) */
                                 if (!server.restockDishQueue.contains(dish)) {
                                     server.restockDishQueue.add(dish);
-                                    /* Increment the restocking count so we can check how many drones are restocking
+                                    /* Increment the restocking count so we can check how many staff are restocking
                                     a given dish */
                                     dish.noRestocking ++;
                                 }

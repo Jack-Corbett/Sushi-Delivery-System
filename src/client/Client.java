@@ -16,10 +16,9 @@ public class Client implements ClientInterface {
     private ArrayList<UpdateListener> updateListeners = new ArrayList<>();
 
     /**
-     * Constructor to instantiate the communication class and array lists
+     * Constructor that removes the initial acknowledgment method from the received message queue
      */
     public Client() {
-        // This removes the initial acknowledgment method from the queue
         comms.receiveMessage();
     }
 

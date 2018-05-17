@@ -36,17 +36,23 @@ public class IngredientStock {
 
                     // Loop for each ingredient in the stock system
                     for (Ingredient ingredient : stock.keySet()) {
-                        /* If the stock level is below the threshold or restocking is currently enabled for that
-                        ingredient */
+                        // If the stock level is below the required level or restocking is triggered
                         if (stock.get(ingredient).intValue() < ingredient.getRestockThreshold() ||
                                 ingredient.noRestocking > 0) {
 
+                            /* If the drones that are currently restocking won't reach the required level also
+                            add to the queue (we multiple by restock amount as this is the amount each drone carries)*/
                             if (stock.get(ingredient).intValue() +
                                     (ingredient.getRestockAmount() * ingredient.noRestocking) <
                                     ingredient.getRestockThreshold() + ingredient.getRestockAmount()) {
 
+                                /* Check it isn't already in the queue.
+                                (this could happen if no drone had started restocking it but it had already been
+                                flagged for restocking) */
                                 if (!server.restockIngredientQueue.contains(ingredient)) {
                                     server.restockIngredientQueue.add(ingredient);
+                                    /* Increment the restocking count so we can check how many drones are restocking
+                                    a given ingredient */
                                     ingredient.noRestocking ++;
                                 }
                             }

@@ -39,6 +39,4 @@ public class UpdateEvent {
 		this.oldValue = oldValue;
 		this.newValue = newValue;
 	}
-
-
 }

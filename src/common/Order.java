@@ -86,6 +86,13 @@ public class Order extends Model {
     }
 
     /**
+     * @return If the order has been cancelled
+     */
+    public Boolean getCancelled() {
+        return cancelled;
+    }
+
+    /**
      * @param status The new order status
      */
     public void setStatus(String status) {
