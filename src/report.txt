@@ -1,0 +1,170 @@
+Part 1: Ingredients, Suppliers and Sushi Dishes
+
+List of classes implemented (written as package.class):
+common.Dish
+common.Ingredient
+common.Supplier
+
+List of methods implemented (written as package.class.method):
+All methods included in the above classes were implemented for this part
+
+1 paragraph description of what you did:
+I created the three classes that extend model above with constructors to set their initial properties. I also added
+get and set methods so their properties could be changed and added calls to notifyUpdate to update the UI.
+
+-----------------
+
+Part 2: Stock Management
+
+List of classes implemented (written as package.class)
+common.DishStock
+common.IngredientStock
+
+List of methods implemented (written as package.class.method):
+All methods included in the above classes were implemented for this part
+
+1 paragraph description of what you did:
+Each class stores a concurrent hash map of ingredients/dishes and quantities that represents the stock currently
+available to the restaurant. They also run a thread that monitors the stock level to ensure that restocking up to the
+restock threshold + the restock amount is triggered if stock level hits the restock threshold. This made it much simpler
+to assign jobs to staff and drones rather than them checking the stock levels directly. I chose this implementation
+rather than having the drones and staff check the stock levels directly as this avoided potential locking issues and,
+I believe, did a better job of modelling the domain by assigning tasks to workers, rather than giving them control of
+the stock system. They each also store a flag to enable/disable restocking. Removing stock is also implemented to
+enable ingredients to be used up or dishes delivered.
+
+-----------------
+
+Part 3: Kitchen Staff
+
+List of classes implemented (written as package.class)
+common.Staff
+
+List of methods implemented (written as package.class.method):
+All methods included in the above class were implemented for this part
+
+1 paragraph description of what you did:
+Each staff member has a name and a status which will be updated with the task they are carrying out. The class
+implements runnable and polls the restock dish queue to see if any jobs need to be carried out. If a dish needs to be
+prepared the staff member checks there are enough ingredients to prepare it by looping through the recipe. If there are
+they will simulate dish preparation by the thread waiting for 20 - 60 seconds, before adding the dish to stock.
+
+-----------------
+
+Part 4: Communication Layer
+
+List of classes implemented (written as package.class)
+client.CommsClient
+server.CommsServer
+server.CommsServerThread
+
+List of methods implemented (written as package.class.method):
+All methods included in the above class were implemented for this part
+
+1 paragraph description of what you did:
+The CommsServer is the main communication class which sets up the server socket and when it receives a new connection
+starts a CommsServerThread to send and receive messages directly, which allows the server to handle multiple clients
+simultaneously. The CommsServerThread handles the message receiving, responding and actioning by calling methods on the
+Server class. It takes a similar approach to the configuration file by splitting string messages to check their type
+and routes them to the correct action. When a client disconnects the thread is closed and a space freed up in the thread
+array. Finally the CommsClient is responsible for the client side communication, sending string requests to the server
+which are triggered by the client class. It maintains a queue of messages to send and received messages from the
+server which can be accessed through the sendMessage and receiveMessage methods.
+
+-----------------
+
+Part 5: Client
+
+List of classes implemented (written as package.class)
+client.Client
+ClientApplication
+
+List of methods implemented (written as package.class.method):
+All methods included in the above class were implemented for this part
+
+1 paragraph description of what you did:
+The client class implements the client interface to provide the UI with the required methods. It also instantiates a
+CommsClient object and uses it's send and receive messages methods. It also holds update listeners so the UI can be
+updated on model changes. Each method consists of sending a message to the server, checking the response and depending
+on the response performing an action. The ClientApplication simple contains the required methods to start the client
+program.
+
+-----------------
+
+Part 6: Drones
+
+List of classes implemented (written as package.class)
+common.Drone
+
+List of methods implemented (written as package.class.method):
+All methods included in the above class were implemented for this part
+
+1 paragraph description of what you did:
+Each drone member has a name (random number to make it simple to identify), a status which will be updated with the task
+they are carrying out and a flying speed which is used to calculate the wait time for delivering and restocking.
+The class implements runnable and polls the order queue to see if any orders need to be delivered. If they do it checks
+to see if there is enough dishes in stock to fulfill the order. If there is it sleeps simulating delivery. If not it
+polls the ingredient restock queue to see if any ingredients need to be fetched. If there is it sleeps simulating
+collection and then adds the ingredient restock amount to stock. I chose to use the restock amount as the amount a drone
+would fetch each time as it is more realistic that a drone would carry 5kg of rice each time rather than 1g. It also
+meant I didn't have to pick an arbitrary value for all ingredients as 1000g of rice is fine but 1000 avocados is a
+little harder to carry.
+
+-----------------
+
+Part 7: Configuration
+
+List of classes implemented (written as package.class)
+common.Configuration
+
+List of methods implemented (written as package.class.method):
+All methods included in the above class were implemented for this part
+
+1 paragraph description of what you did:
+Reads the configuration file (is also able to read the backup file created by the DataPersistence class) to set up the
+objects on the server. It parses the file line by line splitting it to identify the object type and it's properties.
+It then calls the required method on the server to instantiate them.
+
+-----------------
+
+Part 8: Server
+
+List of classes implemented (written as package.class)
+server.Server
+ServerApplication
+
+List of methods implemented (written as package.class.method):
+All methods included in the above class were implemented for this part
+
+1 paragraph description of what you did:
+The server class implements the server interface to provide the UI with the required methods. It stores references to
+all the objects used in the program including the stock controllers, array lists of suppliers, postcodes, staff and so
+on, the queues for orders and to store jobs for staff and drones and finally it also instantiates a CommsServer object.
+Like the client it stores the update listeners also to enable to UI to be updated on model changes. The
+ServerApplication simply instantiates the required objects to start the program and calls the configuration class
+to read the config file. In the event of a system failure this could be changed to read backup.txt to restore the system
+to it's previous state.
+
+-----------------
+
+Part 9: Persistence
+
+List of classes implemented (written as package.class)
+common.DataPersistence
+
+List of methods implemented (written as package.class.method):
+All methods included in the above class were implemented for this part
+
+1 paragraph description of what you did:
+The DataPersistence class has a single method called backup which is called by a drone when it has completed a delivery,
+this way it can keep up to date with the system without calling backup constantly. It uses a BufferedWriter and
+StringBuilder to construct a file in the same format as config.txt by calling methods on the server the fetch the
+information.
+
+-----------------
+
+Assumptions made: Staff can only restock one dish at a time while drones fetch the restock amount of an ingredient each
+time they restock (justification above). The system always reads the configuration from config.txt when it starts rather
+than reading the backup of the last session: backup.txt.
+
+Any other comments:

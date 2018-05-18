@@ -71,6 +71,8 @@ public class Drone extends Model implements Runnable {
                             }
                         }
                         order.setComplete();
+                        // Trigger a backup to be saved
+                        server.dataPersistence.backup(server);
                     } catch (InterruptedException e) {
                         System.err.println("Drone failed to deliver order: " + order.getName());
                     }
@@ -96,6 +98,8 @@ public class Drone extends Model implements Runnable {
                 status = "Idle";
                 notifyUpdate();
             }
+            /* Wait 0.1 seconds before checking again to decrease CPU load as the spec requires this to be
+                continually checked */
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {

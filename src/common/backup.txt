@@ -10,19 +10,16 @@ DISH:Side Rice:Side portion of rice:5.0:1:10:500 * Rice,
 DISH:Sushi Roll:Rice and things:10.0:1:10:10 * Salt,30 * Vinegar,1 * Avocado,150 * Rice,
 
 POSTCODE:SO17 1BJ:2
-POSTCODE:SO17 3JH:4
-POSTCODE:SO17 8HB:2
-POSTCODE:SO17 9DL:3
 USER:Admin:password:University Road:SO17 1BJ
 
 ORDER:Admin:5 * Sushi Roll,2 * Side Rice,
 
 STOCK:Side Rice:0
-STOCK:Sushi Roll:10
-STOCK:Salt:0
-STOCK:Vinegar:0
-STOCK:Avocado:0
-STOCK:Rice:300
+STOCK:Sushi Roll:5
+STOCK:Salt:100
+STOCK:Vinegar:2000
+STOCK:Avocado:20
+STOCK:Rice:8300
 
 STAFF:Joshua
 STAFF:Mary

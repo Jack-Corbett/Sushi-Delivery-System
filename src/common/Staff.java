@@ -60,6 +60,8 @@ public class Staff extends Model implements Runnable {
                     server.restockDishQueue.add(dish);
                 }
             }
+            /* Wait 0.1 seconds before checking again to decrease CPU load as the spec requires this to be
+                continually checked */
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {

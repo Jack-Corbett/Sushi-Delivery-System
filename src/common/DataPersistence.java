@@ -21,7 +21,7 @@ public class DataPersistence {
     public void backup(Server server) {
         try {
             // Setup a writer to the file
-            BufferedWriter writer = new BufferedWriter(new FileWriter("src/common/backup.txt", false));
+            BufferedWriter writer = new BufferedWriter(new FileWriter("src/common/backup.txt"));
             StringBuilder sb = new StringBuilder();
 
             for (Supplier supplier : server.getSuppliers()) {

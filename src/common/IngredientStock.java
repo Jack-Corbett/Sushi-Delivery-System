@@ -52,13 +52,15 @@ public class IngredientStock {
                                 if (!server.restockIngredientQueue.contains(ingredient)) {
                                     server.restockIngredientQueue.add(ingredient);
                                     /* Increment the restocking count so we can check how many drones are restocking
-                                    a given ingredient */
+                                    a given dish */
                                     ingredient.noRestocking ++;
                                 }
                             }
                         }
                     }
                 }
+                /* Wait 0.1 seconds before checking again to decrease CPU load as the spec requires this to be
+                continually checked */
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {

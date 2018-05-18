@@ -39,8 +39,8 @@ public class DishStock {
                         if (stock.get(dish).intValue() <= dish.getRestockThreshold().intValue() ||
                                 dish.noRestocking > 0) {
 
-                            /* If the staff that are currently restocking won't reach the required level also
-                            add to the queue*/
+                            /* If the staff that are currently restocking won't reach the required level add to the
+                            queue*/
                             if (stock.get(dish).intValue() + dish.noRestocking <
                                             dish.getRestockThreshold().intValue() +
                                                     dish.getRestockAmount().intValue()) {
@@ -58,6 +58,8 @@ public class DishStock {
                         }
                     }
                 }
+                /* Wait 0.1 seconds before checking again to decrease CPU load as the spec requires this to be
+                continually checked */
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {

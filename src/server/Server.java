@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class Server implements ServerInterface {
 
     // Responsible for backing up the server state to file when a change is made
-    private DataPersistence dataPersistence = new DataPersistence();
+    public DataPersistence dataPersistence = new DataPersistence();
 
     // STORE OBJECT REFERENCES
     // Instantiate the stock controllers
@@ -532,13 +532,12 @@ public class Server implements ServerInterface {
     }
 
     /**
-     * Notifies all update listeners and triggers a backup of the current system state
+     * Notifies all update listeners
      */
     @Override
     public void notifyUpdate() {
         for (UpdateListener updateListener : updateListeners) {
             updateListener.updated(new UpdateEvent());
         }
-        dataPersistence.backup(this);
     }
 }
